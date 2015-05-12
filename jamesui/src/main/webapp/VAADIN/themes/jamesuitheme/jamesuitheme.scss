@@ -1,0 +1,81 @@
+// Global variable overrides. Must be declared before importing Reindeer.
+
+// Defines the plaintext font size, weight and family. Font size affects general component sizing.
+//$v-font-size: 16px;
+//$v-font-weight: 300;
+//$v-font-family: "Open Sans", sans-serif;
+
+// Defines the border used by all components.
+//$v-border: 1px solid (v-shade 0.7);
+//$v-border-radius: 4px;
+
+// Affects the color of some component elements, e.g Button, Panel title, etc
+//$v-background-color: hsl(210, 0%, 98%);
+// Affects the color of content areas, e.g  Panel and Window content, TextField input etc
+//$v-app-background-color: $v-background-color;
+
+// Affects the visual appearance of all components
+//$v-gradient: v-linear 8%;
+//$v-bevel-depth: 30%;
+//$v-shadow-opacity: 5%;
+
+// Defines colors for indicating status (focus, success, failure)
+//$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
+//$v-friendly-color: #2c9720;
+//$v-error-indicator-color: #ed473b;
+
+// Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
+
+
+
+@import "../reindeer/reindeer.scss";
+
+@mixin jamesuitheme {
+
+
+  /* the default Vaadin theme to extends */
+  @include reindeer;
+
+ 
+  /* To override an existing class name of the default theme (ie: reindeer) declare a new class with the same name.
+     In case of overrride is not necessary use addStyleName(className) to apply the style to a Component 
+   */
+  .v-tree-node span {
+     display: inline-block;
+     padding-left: 24px;
+  }
+  
+  
+  
+  /* Define a new class based on an existing one. 
+     Note the naming convention: <name-of-existing-class>-<mysuffix>
+     Where <mysuffix> is the name to use to apply the style from java:
+     mycomponent.addStyleName("mysuffix");  ("checkboxed", "unchecked", "checked" are suffix)
+   */     
+  .v-tree-checkboxed .v-tree-node-caption-unchecked div span{
+    background: url("img/checkbox-unchecked.png") no-repeat;
+    background-position: 0px 7px;   
+    padding-left: 24px;
+    padding-bottom: 7px;
+    padding-top: 7px;
+  }
+    
+    
+  .v-tree-checkboxed .v-tree-node-caption-checked div span{
+    background: url("img/checkbox-checked.png") no-repeat;
+    background-position: 0px 7px;   
+    padding-left: 24px;
+    padding-bottom: 7px;
+    padding-top: 7px;
+  }
+  
+  /* style for mapping tree root nodes */
+  .v-tree-checkboxed .v-tree-node-caption-normal div span{
+    font-weight: bold;
+    padding-bottom: 3px; 
+    padding-left: 24px; 
+    padding-top: 5px;  
+  }
+
+ 
+}

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+ 	
+ 
+	<!-- A Spring Factory to create Quartz JobDetail instance -->
+	<bean name="monitorJobDetails" class="org.springframework.scheduling.quartz.JobDetailFactoryBean"> 
+		<!-- the job to execute -->
+		<property name="jobClass" value="org.apache.james.jamesui.backend.scheduler.MonitorJob" /> 		
+		<property name="group" value="monitorJobGroup" />
+		<property name="name" value="monitorJob" />
+		<property name="description" value="Apache James monitoring job" />
+		
+		<!-- the input argument for the job -->
+		<property name="jobDataMap">
+	        <map>	           
+	           <entry key="activeMQclient" value-ref="activeMQclient" />
+	           <entry key="camelClient" value-ref="camelClient" />
+	        </map>
+	    </property>
+		
+		<!-- To have a job without Trigger -->
+		<property name="durability" value="true" />		
+	</bean>
+	
+
+	<!-- TRIGGER -->
+	<!-- A Spring FactoryBean for creating a Quartz SimpleTrigger instance -->
+	<bean id="monitorJobTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean"> 
+
+		<property name="jobDetail" ref="monitorJobDetails" />		
+		<!-- Note: some property are set or customized by code (eg: repeatIntervale, startDate...) because his value depends on the User input in the Front-end -->
+  		<property name="repeatInterval" value="10000" />		
+		<property name="description" value="Hourly Monitor trigger" />
+		
+		<!-- The TriggerKey values -->
+		<property name="name" value="monitorJobTriggerName" /> 
+		<property name="group" value="monitorJobTriggerGroup" /> 
+	</bean>
+ 
+
+    <!-- CREATE AND INITIALIZE THE SCHEDULER LOADING QUARTZ config file: quartz.properties -->
+	<bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	
+	    <!-- the scheduler doesn't start on startup: will be started by java code -->
+	    <property name="autoStartup" value="false"/>	  
+ 	    
+		<property name="jobDetails">
+			<list>
+				<ref bean="monitorJobDetails" />
+			</list>
+		</property>
+ 
+        <!-- A list of available Triggers -->
+		<property name="triggers">
+			<list>
+				<ref bean="monitorJobTrigger" /> 
+			</list>
+		</property>
+		
+		<!-- 
+			NOTE: some specific Quartz properties can be provided in Quartz.properties file and set  
+			Or the same properties can be set here setting the fileds of SchedulerFactoryBean
+		 -->
+		<!-- The location of the Quartz properties file  -->
+		<property name="configLocation" value="classpath:quartz.properties"/>
+	</bean>
+ 
+</beans>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><configuration>
+<imapserver enabled="false">
+<bind>1.2.3.4:777</bind>
+<connectionBacklog>111</connectionBacklog>
+<tls>
+<keystore>file://pippo//</keystore>
+<secret>mysecret123</secret>
+<provider>com.provired.fake</provider>
+</tls>
+<helloName autodetect="false">helloName</helloName>
+<connectionLimit>222</connectionLimit>
+<connectionLimitPerIP>333</connectionLimitPerIP>
+</imapserver>
+</configuration>

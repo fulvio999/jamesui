@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><configuration>
+<servers>
+<server>333444555</server>
+<server>234</server>
+<server>795654</server>
+</servers>
+<autodiscover>true</autodiscover>
+<authoritative>true</authoritative>
+<maxcachesize>333</maxcachesize>
+<singleIPperMX>true</singleIPperMX>
+</configuration>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+
+		<display-name>Jamesui</display-name>
+
+		<!-- Spring -->
+		<listener>
+			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		</listener>
+			
+		<listener>
+			<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+		</listener>
+		
+		<context-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring-bean-definitions.xml</param-value>
+		</context-param>
+
+		<!-- Vaadin servlet -->
+		<servlet>
+			<servlet-name>Vaadin Sample Application</servlet-name>
+			<servlet-class>ru.xpoft.vaadin.SpringVaadinServlet</servlet-class>
+			
+			<init-param>
+				<param-name>beanName</param-name>
+				<!-- id of a bean contained in the xml bean definitions -->
+				<param-value>jamesUI</param-value> 
+			</init-param>		
+		</servlet>
+
+		<servlet-mapping>
+			<servlet-name>Vaadin Sample Application</servlet-name>
+			<url-pattern>/*</url-pattern>
+		</servlet-mapping>
+		
+		<servlet-mapping>
+			<servlet-name>Vaadin Sample Application</servlet-name>
+			<url-pattern>/VAADIN/*</url-pattern>
+		</servlet-mapping>
+
+		<context-param>
+			<description>Vaadin production mode</description>
+			<param-name>productionMode</param-name>
+			<param-value>false</param-value>
+		</context-param>
+	
+	
+		<!-- Login page, managed by spring MVC controller -->
+		<servlet>
+			<servlet-name>SpringLoginDispatcherServlet</servlet-name>
+			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+			<init-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value>/WEB-INF/spring-mvc-config.xml</param-value>
+			</init-param>
+			<load-on-startup>5</load-on-startup>
+		</servlet>
+		
+		<servlet-mapping>
+			<servlet-name>SpringLoginDispatcherServlet</servlet-name>
+			<url-pattern>/login/*</url-pattern>
+		</servlet-mapping>
+
+		<!-- To access at the Logback internal status using ServerStatus manager (ie: the logback configuration used, at url like: http://localhost:8081/jamesui/lbClassicStatus -->
+		<servlet>
+		   <servlet-name>ViewStatusMessages</servlet-name>
+		   <servlet-class>ch.qos.logback.classic.ViewStatusMessagesServlet</servlet-class>
+		</servlet>
+		
+		<servlet-mapping>
+		   <servlet-name>ViewStatusMessages</servlet-name>
+		   <url-pattern>/lbClassicStatus</url-pattern>
+		</servlet-mapping>
+
+		 
+		<!-- Spring Security filter -->
+		<filter>
+			<filter-name>springSecurityFilterChain</filter-name>
+			<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		</filter>
+		
+		<filter-mapping>
+			<filter-name>springSecurityFilterChain</filter-name>
+			<url-pattern>/*</url-pattern>
+		</filter-mapping>
+	
+</web-app>

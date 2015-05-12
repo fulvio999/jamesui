@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- scan period for Automatically reloading configuration file upon modification (see: http://logback.qos.ch/manual/configuration.html#autoScan) -->
+<configuration debug="false" scan="true" scanPeriod="3600 seconds">
+ 
+	<!-- property name="LOG_HOME" value="C:/Users/Desktop/MY_DOC" / -->
+ 
+    <!-- Console appender -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+			</Pattern>
+		</layout>
+	</appender>
+ 
+    <!-- Appender used for log.debug messages --> 
+	<appender name="FILE-DEBUG-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/jamesui/debug.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+			</Pattern>
+		</encoder>
+ 
+        <!-- rolling policy for older log files (the 'i' suffix is the index number to append when the file rotate happen: the roll-over number) -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">			
+			<fileNamePattern>${catalina.base}/logs/jamesui/archived/debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy	class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy> 
+	</appender>
+ 
+ 
+    <!-- Appender used for log.error messages --> 
+	<appender name="FILE-ERROR-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/jamesui/error.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>				
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+			</Pattern>
+		</encoder>
+ 
+ 	    <!-- rolling policy for older log files -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">			
+			<fileNamePattern>${catalina.base}/logs/jamesui/archived/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy	class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy> 
+	</appender>
+	
+
+		<!-- SMTPAppender : NOT USED CURRENTLY, BUT COULD BE USEFUL IN THE FUTURE -->	
+<!-- 	<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender"> -->
+<!-- 	    <smtpHost>ADDRESS-OF-YOUR-SMTP-HOST</smtpHost> -->
+<!-- 	    <to>EMAIL-DESTINATION</to> -->
+<!-- 	    <to>ANOTHER_EMAIL_DESTINATION</to> additional destinations are possible -->
+<!-- 	    <from>SENDER-EMAIL</from> -->
+<!-- 	    <subject>TESTING: %logger{20} - %m</subject> -->
+<!-- 	    <layout class="ch.qos.logback.classic.PatternLayout"> -->
+<!-- 	     	 <pattern>%date %-5level %logger{35} - %message%n</pattern> -->
+<!-- 	    </layout>        -->
+<!--  	 </appender> -->
+ 
+ 
+	<!-- Send logs to both console and file audit -->
+	<logger name="org.apache.james.jamesui" level="debug" additivity="false">
+		<appender-ref ref="FILE-DEBUG-APPENDER" />
+		<!--  appender-ref ref="STDOUT" / -->
+	</logger>
+	
+    
+    <!-- handles all logging for all the other classes and library different from the ones declared in the above logger block -->
+	<root level="info">
+		<appender-ref ref="FILE-ERROR-APPENDER" />
+	</root>
+ 
+</configuration>

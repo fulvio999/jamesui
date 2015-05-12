@@ -1,0 +1,472 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>org.apache.jamesui</groupId>
+  <artifactId>jamesui</artifactId>
+  <packaging>war</packaging>
+  <version>1.0</version>
+  <name>jamesui Webapp</name>
+ 
+  
+  <properties>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<vaadin.version>7.3.0</vaadin.version>
+		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>		
+		<james.lib.version>3.0-beta4</james.lib.version>
+		<camel.lib.version>2.13.1</camel.lib.version>
+		<activemq.lib.version>5.4.2</activemq.lib.version>
+		<quartz.lib.version>2.2.0</quartz.lib.version>
+		<mapdb.lib.version>1.0.7</mapdb.lib.version>
+		<junit.lib.version>3.8.1</junit.lib.version>
+		<servlet.api.lib.version>3.1.0</servlet.api.lib.version>
+		<itext.lib.version>5.1.3</itext.lib.version>
+		<spring.version>4.1.0.RELEASE</spring.version>
+		<spring.security.version>3.2.5.RELEASE</spring.security.version>
+  </properties>
+  
+  <repositories>  
+	 <repository>
+	     <id>vaadin-addons</id>
+		 <url>http://maven.vaadin.com/vaadin-addons</url>
+	 </repository>
+		
+	 <repository>
+		  <id>vaadin-snapshots</id>
+		  <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+		  <releases>
+			 <enabled>false</enabled>
+		  </releases>
+		  <snapshots>
+		 	 <enabled>true</enabled>
+		  </snapshots>
+	   </repository>	   
+	</repositories>	
+	
+	<pluginRepositories>
+		<pluginRepository>
+			<id>vaadin-snapshots</id>
+			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>		
+	</pluginRepositories>
+  
+  
+    <dependencies>
+  
+	    <dependency>
+	        <groupId>junit</groupId>
+	        <artifactId>junit</artifactId>
+	        <version>${junit.lib.version}</version>
+	        <scope>test</scope>
+	    </dependency>
+	    
+	    <!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		
+		<!-- Transaction dependency is required with Quartz integration -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+		
+		<!-- Login page -->
+		<!-- Spring MVC -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.20</version>
+		</dependency>
+		
+	   <!-- Spring Security -->
+	   <dependency>
+		  <groupId>org.springframework.security</groupId>
+		  <artifactId>spring-security-core</artifactId>
+		  <version>${spring.security.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-core</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-aop</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-context</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-beans</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-expression</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>		
+		</dependency>
+		
+		<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-config</artifactId>
+		<version>${spring.security.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-core</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-aop</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-context</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-beans</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-web</artifactId>
+		<version>${spring.security.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-jdbc</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-aop</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-web</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-tx</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-context</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-beans</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-expression</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-core</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>	    
+		
+	    <!-- Vaadin -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-server</artifactId>
+			<version>${vaadin.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-push</artifactId>
+			<version>${vaadin.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-client-compiled</artifactId>
+			<version>${vaadin.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-client</artifactId>
+			<version>${vaadin.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-themes</artifactId>
+			<version>${vaadin.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-client-compiler</artifactId>
+			<version>${vaadin.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.vaadin.addons</groupId>
+		    <artifactId>pagedtable</artifactId>
+		    <version>0.6.5</version>
+		</dependency>		
+		
+		<!-- Addon that create a confirm popup dialog -->
+		<dependency>
+			<groupId>org.vaadin.addon</groupId>
+			<artifactId>confirmdialog</artifactId>
+			<version>2.0.5</version>			
+		</dependency>		
+		
+		<!-- Vaadin - Spring integration -->
+	    <dependency>
+	        <groupId>ru.xpoft.vaadin</groupId>
+	        <artifactId>spring-vaadin-integration</artifactId>
+	        <version>3.1</version>
+	    </dependency>
+
+		<!-- Logging system -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		
+		<!-- Manage James server configuration files -->
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.10</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		
+		<!-- web-app lib -->
+		<dependency>
+		   <groupId>javax.servlet</groupId>
+		   <artifactId>javax.servlet-api</artifactId>	
+		   <version>${servlet.api.lib.version}</version>	
+		   <scope>provided</scope>
+		</dependency>	
+		
+		<!-- Quartz scheduler -->
+		<dependency>
+		    <groupId>org.quartz-scheduler</groupId>
+		    <artifactId>quartz</artifactId>
+		    <version>${quartz.lib.version}</version>
+		</dependency>	
+		
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jobs</artifactId>
+			<version>${quartz.lib.version}</version>
+		</dependency>	
+		
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>1.1</version>
+		</dependency>
+		
+		<!-- key-value database persistence DB -->
+		<dependency>
+			<groupId>org.mapdb</groupId>
+			<artifactId>mapdb</artifactId>
+			<version>${mapdb.lib.version}</version>
+		</dependency>
+		
+	    <!-- for pdf export of statistics snapshot -->
+	    <dependency>
+	  	   <groupId>com.itextpdf</groupId>
+	  	   <artifactId>itextpdf</artifactId>
+	  	   <version>${itext.lib.version}</version> 
+	    </dependency>
+		
+		<!-- third part library to query James MBean -->
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>${activemq.lib.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-core</artifactId>
+			<version>${camel.lib.version}</version>
+		</dependency>		
+		
+		<!-- James core server lib -->
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>james-server-dnsservice-api</artifactId>
+			<version>${james.lib.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>james-server-dnsservice-library</artifactId>
+			<version>${james.lib.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>james-server-data-library</artifactId>
+			<version>${james.lib.version}</version>
+	    </dependency>
+	    
+	    <dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>james-server-data-api</artifactId>
+			<version>${james.lib.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.james</groupId>
+	    	<artifactId>james-server-protocols-smtp</artifactId>
+	    	<version>${james.lib.version}</version>
+	    </dependency>
+	    
+	    <dependency>
+			<groupId>org.apache.james</groupId>
+	    	<artifactId>james-server-protocols-pop3</artifactId>
+	    	<version>${james.lib.version}</version>
+	    </dependency>
+	    
+	     <dependency>
+			<groupId>org.apache.james</groupId>
+	    	<artifactId>james-server-protocols-imap4</artifactId>
+	    	<version>${james.lib.version}</version>
+	    </dependency>
+
+<!-- Currently not used, necessary to read user mail folder with java mail API -->		
+<!-- 		<dependency> -->
+<!-- 			<groupId>javax.mail</groupId> -->
+<!-- 			<artifactId>mail</artifactId> -->
+<!-- 			<version>1.4.7</version> -->
+<!-- 		</dependency> -->
+		
+<!-- 		<dependency> -->
+<!-- 			<groupId>javax.mail</groupId> -->
+<!-- 			<artifactId>javax.mail-api</artifactId> -->
+<!-- 			<version>1.4.7</version> -->
+<!-- 		</dependency> -->
+    
+</dependencies>
+  
+  <build>
+      <finalName>jamesui</finalName>
+    
+	    <resources>
+		     <resource>
+		       <directory>src/main/resources</directory>
+		       <filtering>false</filtering>
+		       <includes>
+		          <include>*.xml</include>
+		          <include>*.html</include>
+		          <include>quartz.properties</include>
+		          <include>users.properties</include>		          		        
+		        </includes>
+		        <excludes>
+		          <!-- version of jameui.config used for development in Eclipse -->
+		          <exclude>*.config</exclude>
+		        </excludes>
+		     </resource>	     
+	     
+		     <resource>
+				<directory>src/main/resources</directory>
+				<!-- With filtering, Maven fill that file with properties defined into the POM.xml file -->
+				<filtering>true</filtering>
+				<includes>
+					<include>product-details.properties</include>
+				</includes>
+			</resource>
+			
+			<!-- 
+				include to output folder the Flot.js and other js files necessary for the chart. That file are inside java source because required
+				by Vaadin
+			 -->
+			<resource>
+	            <directory>src/main/java</directory>
+	            <includes>
+	                <include>**/*.js</include>
+	            </includes>
+           </resource>
+	     
+	   </resources>
+	
+		<plugins>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>	
+					<useProjectReferences>true</useProjectReferences>
+					<wtpversion>2.0</wtpversion>			
+					<version>2.9</version>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+				<version>3.1</version>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.2</version>				
+			</plugin>
+			
+			
+			<!-- By default tests are skipped because they write to real James/conf folder -->
+		    <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.4.2</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>	        
+			
+		</plugins>
+		
+  </build>
+</project>

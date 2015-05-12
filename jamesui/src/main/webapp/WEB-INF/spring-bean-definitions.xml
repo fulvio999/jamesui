@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	
+	<context:annotation-config/>
+	<context:component-scan base-package="org.apache.james.jamesui"/>
+	
+	<!-- Scope "prototype" allow more jamesUI instance creation -->
+	<bean id="jamesUI" class="org.apache.james.jamesui.frontend.JamesUI" scope="prototype">
+	   <property name="jamesClient" ref="jamesClient"/>
+	   <property name="activeMQclient" ref="activeMQclient"/>
+	   <property name="camelClient" ref="camelClient"/>	   
+	   <property name="scheduler" ref="schedulerFactoryBean"/>	
+	   <property name="jamesuiConfigurationManager" ref="jamesuiConfigurationManager"/>	   
+	</bean>  
+	
+	
+	<!-- Custom Clients used to query James server  -->
+	<bean id="jamesClient" class="org.apache.james.jamesui.backend.client.jmx.JamesClient"/>	
+	<bean id="activeMQclient" class="org.apache.james.jamesui.backend.client.jmx.ActiveMQclient"/>
+	<bean id="camelClient" class="org.apache.james.jamesui.backend.client.jmx.CamelClient"/>
+	<!-- Manager to check jamesUI configuration -->
+	<bean id="jamesuiConfigurationManager" class="org.apache.james.jamesui.backend.configuration.manager.JamesuiConfigurationManager"/>
+
+	
+	<!-- Beans used for user authentication -->
+	<bean id="userDao" class="org.apache.james.jamesui.backend.authentication.manager.UserDao"/>
+    <bean id="customUserDetailsService" class="org.apache.james.jamesui.backend.authentication.manager.AuthenticationService">
+   	   <property name="UserDao" ref="userDao"/>
+    </bean>
+    
+	
+	<!-- Spring security configuration -->
+	<import resource="spring-security.xml"/>
+	
+	<!-- Spring - Quartz configuration -->
+	<import resource="spring-quartz.xml"/>
+
+</beans>
