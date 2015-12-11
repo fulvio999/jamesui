@@ -6,7 +6,7 @@
   <groupId>org.apache.jamesui</groupId>
   <artifactId>jamesui</artifactId>
   <packaging>war</packaging>
-  <version>1.0</version>
+  <version>1.1</version>
   <name>jamesui Webapp</name>
  
   
