@@ -98,6 +98,9 @@ public class JamesClient {
 	          DomainListManagementMBean domainListMbeanProxy = (DomainListManagementMBean) JMX.newMBeanProxy(mBeanServerConnection, jamesDomainsMbeanName, org.apache.james.domainlist.api.DomainListManagementMBean.class);
 	        
 	  	      String[] allDomains = domainListMbeanProxy.getDomains();
+	  	      //true n case of james clean installation
+	  	      if(allDomains == null)
+	  	    	 allDomains = new String[]{""}; 
 	  	      
 	  	      return allDomains;
   	      
@@ -151,7 +154,7 @@ public class JamesClient {
   	          DomainListManagementMBean domainListManagementMbeanProxy = (DomainListManagementMBean) JMX.newMBeanProxy(mBeanServerConnection, jamesUsersMbeanName, org.apache.james.domainlist.api.DomainListManagementMBean.class);
   	          domainListManagementMbeanProxy.removeDomain(domainToRemove);
   	     
-  		     return true;
+  		      return true;
   	    
       	 }catch(Exception e){  
       		 LOG.error("Error removing james domain, cause: ",e);
@@ -204,6 +207,9 @@ public class JamesClient {
 		    
 		    //for(int i=0;i<allUser.length;i++)
 		       //LOG.trace("\nJames User = " +allUser[i]);
+		    
+		    if(allUser == null)
+		       allUser = new String[]{""}; 
 	     
 		    return allUser;
 	    
