@@ -5,8 +5,11 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.SmtpServer;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
+import org.apache.james.jamesui.backend.configuration.manager.JamesuiConfigurationManager;
+import org.apache.james.jamesui.backend.configuration.manager.Pop3serverConfigManager;
 import org.apache.james.jamesui.backend.configuration.manager.SmtpServerConfigManager;
 
 
@@ -17,7 +20,7 @@ import org.apache.james.jamesui.backend.configuration.manager.SmtpServerConfigMa
  */
 public class SmtpServerConfigManagerTest extends TestCase {
 	
-	private static final String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
+	private static final String FAKE_JAMES_BASE_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
 	
 	private SmtpServerConfigManager smtpServerConfigManager;
 	private static final String TARGET_FILE_NAME = "smtpserver.xml";
@@ -25,17 +28,22 @@ public class SmtpServerConfigManagerTest extends TestCase {
 	protected void setUp() throws Exception {
 		
 		super.setUp();
-		smtpServerConfigManager = new SmtpServerConfigManager();		
+		
+		JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
+		JamesuiConfiguration jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();
 		
 		//remove old test result
-		File dnsFile = new File(JAMES_CONF_FOLDER+File.separator+TARGET_FILE_NAME);
+		File dnsFile = new File(FAKE_JAMES_BASE_FOLDER+File.separator+TARGET_FILE_NAME);
 		if(dnsFile.exists())
-		   dnsFile.delete();		
+		   dnsFile.delete();	
+		
+		jamesuiConfiguration.setJamesBaseFolder(FAKE_JAMES_BASE_FOLDER);
+		smtpServerConfigManager = new SmtpServerConfigManager(jamesuiConfiguration);	
 	}
 
 	public void testReadConfiguration() throws ConfigurationException {
 		
-		SmtpServer smtpServer = smtpServerConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		SmtpServer smtpServer = smtpServerConfigManager.readConfiguration();
 		assertNotNull(smtpServer);
 		System.out.println(smtpServer.toString());		
 	}
@@ -67,10 +75,10 @@ public class SmtpServerConfigManagerTest extends TestCase {
 		
 		System.out.println("SmtpServer to store: "+smtpServer.toString());
 							
-		smtpServerConfigManager.updateConfiguration(smtpServer,JAMES_CONF_FOLDER);
+		smtpServerConfigManager.updateConfiguration(smtpServer);
 						
 		//part 2: check previously stored configuration
-		SmtpServer loadedConfig = smtpServerConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		SmtpServer loadedConfig = smtpServerConfigManager.readConfiguration();
 		
 		System.out.println("SmtpServer loaded: "+loadedConfig.toString());
 						

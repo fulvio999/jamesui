@@ -6,35 +6,41 @@ import junit.framework.TestCase;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.james.jamesui.backend.configuration.bean.ImapServer;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.ImapServerConfigManager;
+import org.apache.james.jamesui.backend.configuration.manager.JamesuiConfigurationManager;
 
 /**
  * Test case for read/write operations on the configuration file imapserver.xml
  * @author fulvio
  *
  */
-public class ImapServerConfigManagerTest extends TestCase {
-	  
-    private static final String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
-	private static final String TARGET_FILE_NAME = "imapserver.xml";
+public class ImapServerConfigManagerTest extends TestCase {	
 	
+    private static final String FAKE_JAMES_BASE_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
+    private static final String TARGET_FILE_NAME = "imapserver.xml";
+    
 	private ImapServerConfigManager imapServerConfigManager;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		
+		JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
+		JamesuiConfiguration jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();
+		
 		//remove old test result
-		File dnsFile = new File(JAMES_CONF_FOLDER+File.separator+TARGET_FILE_NAME);
+		File dnsFile = new File(FAKE_JAMES_BASE_FOLDER+File.separator+TARGET_FILE_NAME);
 		if(dnsFile.exists())
 		   dnsFile.delete();
 		
-		imapServerConfigManager = new ImapServerConfigManager();
+		jamesuiConfiguration.setJamesBaseFolder(FAKE_JAMES_BASE_FOLDER);
+		imapServerConfigManager = new ImapServerConfigManager(jamesuiConfiguration);
 	}
 
 	public void testReadConfiguration() throws ConfigurationException {
 		
-		ImapServer imapServer =	imapServerConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		ImapServer imapServer =	imapServerConfigManager.readConfiguration();
 		assertNotNull(imapServer);
 		System.out.println(imapServer.toString());		
 	}
@@ -61,10 +67,10 @@ public class ImapServerConfigManagerTest extends TestCase {
 			
 		System.out.println("ImapServer to save: "+imapServer.toString());
 		
-		imapServerConfigManager.updateConfiguration(imapServer,JAMES_CONF_FOLDER);
+		imapServerConfigManager.updateConfiguration(imapServer);
 		
 		//part 2: check previously stored configuration
-		ImapServer loadedConfig = imapServerConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		ImapServer loadedConfig = imapServerConfigManager.readConfiguration();
 		
 		System.out.println("ImapServer loaded: "+loadedConfig.toString());
 		

@@ -5,8 +5,10 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.Pop3server;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
+import org.apache.james.jamesui.backend.configuration.manager.JamesuiConfigurationManager;
 import org.apache.james.jamesui.backend.configuration.manager.Pop3serverConfigManager;
 
 /**
@@ -16,7 +18,7 @@ import org.apache.james.jamesui.backend.configuration.manager.Pop3serverConfigMa
  */
 public class Pop3serverConfigManagerTest extends TestCase {
 	
-	private static final String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
+	private static final String FAKE_JAMES_BASE_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
 	private static final String TARGET_FILE_NAME = "pop3server.xml";
 	
 	private Pop3serverConfigManager pop3serverConfigManager;
@@ -24,17 +26,21 @@ public class Pop3serverConfigManagerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
+		JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
+		JamesuiConfiguration jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();
+		
 		//remove old test result
-		File dnsFile = new File(JAMES_CONF_FOLDER+File.separator+TARGET_FILE_NAME);
+		File dnsFile = new File(FAKE_JAMES_BASE_FOLDER+File.separator+TARGET_FILE_NAME);
 		if(dnsFile.exists())
 		   dnsFile.delete();
 		
-		pop3serverConfigManager = new Pop3serverConfigManager();
+		jamesuiConfiguration.setJamesBaseFolder(FAKE_JAMES_BASE_FOLDER);
+		pop3serverConfigManager = new Pop3serverConfigManager(jamesuiConfiguration);
 	}
 
     public void testReadConfiguration() throws ConfigurationException {
 		
-		Pop3server pop3server =	pop3serverConfigManager.readConfiguration(JAMES_CONF_FOLDER);	
+		Pop3server pop3server =	pop3serverConfigManager.readConfiguration();	
 		assertNotNull(pop3server);	
 		System.out.println(pop3server.toString());		
 	}
@@ -42,7 +48,7 @@ public class Pop3serverConfigManagerTest extends TestCase {
 	
 	public void testUpdateConfiguration() throws ConfigurationException {		
 		
-		Pop3server currentConfig = pop3serverConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		Pop3server currentConfig = pop3serverConfigManager.readConfiguration();
 		System.out.println("Pop3Server current config: "+currentConfig.toString());
 		
 		//part 1: store a new configuration				
@@ -64,10 +70,10 @@ public class Pop3serverConfigManagerTest extends TestCase {
 							
 		System.out.println("Pop3Server to store: "+pop3server.toString());
 		
-		pop3serverConfigManager.updateConfiguration(pop3server,JAMES_CONF_FOLDER);
+		pop3serverConfigManager.updateConfiguration(pop3server);
 				
 		//part 2: check previously stored configuration
-		Pop3server loadedConfig = pop3serverConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		Pop3server loadedConfig = pop3serverConfigManager.readConfiguration();
 				
 		System.out.println("Pop3Server loaded config: "+loadedConfig.toString());
 		

@@ -15,7 +15,6 @@ public class EnvironmentConfigurationReader {
 	/* read only the ENVIRONMENT VARIABLE (not OS tmp folder) */
 	public static EnvironmentConfiguration config = new EnvironmentConfiguration();
 	
-	private static JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
 	
 	/**
 	 * Return JAVA_HOME env variable
@@ -54,22 +53,6 @@ public class EnvironmentConfigurationReader {
 		return curDir;
 	}
 	
-	/**
-	 * @return The file-system folder where jamesUI must save the MapDB statistics Database files
-	 */
-	public static String getStatsDatabaseFolder() 
-	{		
-		return jamesuiConfigurationManager.loadConfiguration().getStatisticDbLocation();
-	}
-	
-	
-	/**
-	 * Return JAMES root folder (ie: the root folder where james server is installed)
-	 * This parameter is configure by the user in jamesui.config file
-	 */
-	public static String getJamesBaseDir() {		
-		return jamesuiConfigurationManager.loadConfiguration().getJamesBaseFolder();
-	}
 	
 	/** 
 	 * @return The host name of the host running JamesUI

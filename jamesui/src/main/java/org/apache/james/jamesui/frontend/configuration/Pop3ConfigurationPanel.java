@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.james.jamesui.backend.client.jmx.JamesClient;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.Pop3server;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.Pop3serverConfigManager;
@@ -38,6 +39,7 @@ public class Pop3ConfigurationPanel extends Panel {
 	private static final long serialVersionUID = 1L;
 	
 	private JamesClient jamesClient;
+	private JamesuiConfiguration jamesuiConfiguration;
 	
 	private Label pop3TitleLabel;
 	
@@ -71,12 +73,13 @@ public class Pop3ConfigurationPanel extends Panel {
 	/**
 	 * constructor
 	 */
-	public Pop3ConfigurationPanel(JamesClient client) {
+	public Pop3ConfigurationPanel(JamesClient client, JamesuiConfiguration jamesuiConfiguration) {
 		
 		this.setSizeFull();  
 		this.setStyleName(Reindeer.PANEL_LIGHT);
 	    
 		this.jamesClient = client;
+		this.jamesuiConfiguration = jamesuiConfiguration;
 		
 	    GridLayout panelLayout = new GridLayout(2,4);
         panelLayout.setMargin(true);
@@ -86,7 +89,7 @@ public class Pop3ConfigurationPanel extends Panel {
         HorizontalLayout startStopServerLayout = new HorizontalLayout();
 	    startStopServerLayout.setSpacing(true);
         
-        pop3serverConfigManager = new Pop3serverConfigManager();
+        pop3serverConfigManager = new Pop3serverConfigManager(jamesuiConfiguration);
                    
         FormLayout formLayout1 = new FormLayout();         
         FormLayout formLayout2 = new FormLayout();         
@@ -157,7 +160,7 @@ public class Pop3ConfigurationPanel extends Panel {
 		this.savePop3ConfigurationButton = new Button("Save");
 		this.savePop3ConfigurationButton.addClickListener(new SaveConfigurationButtonListener());
 				
-		loadCurrentConfig();
+		loadCurrentPop3Config();
 		
 		startStopServerLayout.addComponent(serverStatusLabel);
 		startStopServerLayout.addComponent(startServerButton);
@@ -228,11 +231,11 @@ public class Pop3ConfigurationPanel extends Panel {
     		
     		LOG.debug("POP3 Server configuration to Update: "+pop3server.toString());
 	    		
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
+    		String JAMES_CONF_FOLDER = jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
     		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER);
     		
     		try {
-    			pop3serverConfigManager.updateConfiguration(pop3server,JAMES_CONF_FOLDER);	
+    			pop3serverConfigManager.updateConfiguration(pop3server);	
     			Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
     			
 			} catch (ConfigurationException e) {
@@ -303,12 +306,12 @@ public class Pop3ConfigurationPanel extends Panel {
 	/**
 	 *  Load the currently stored IMAP configuration in the dedicated file and fill the form to display it 
 	 */
-	private void loadCurrentConfig() {
+	private void loadCurrentPop3Config() {
 		
 		Pop3server pop3server;
 		
 		try {
-			pop3server = pop3serverConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+			pop3server = pop3serverConfigManager.readConfiguration();
 		
 			pop3ServerEnabledCheckBox.setValue(pop3server.isPop3serverEnabled());
 			pop3BindAddress.setValue(pop3server.getBindAddress());

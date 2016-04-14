@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.LmtpServer;
 
 /**
@@ -20,16 +21,15 @@ import org.apache.james.jamesui.backend.configuration.bean.LmtpServer;
  * @author fulvio
  *
  */
-public class LmtpServerConfigManager {
+public class LmtpServerConfigManager {		
 	
-	private static final String TARGET_FILE_NAME = "lmtpserver.xml";
-	private static final String TEMPLATE_FILE_NAME = "lmtpserver-template.conf";
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public LmtpServerConfigManager() {
-		
+	public LmtpServerConfigManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;
 	}
 	
 	
@@ -39,12 +39,14 @@ public class LmtpServerConfigManager {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public LmtpServer readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public LmtpServer readConfiguration() throws ConfigurationException {
 		
 		XMLConfiguration xmlConfiguration = null;
 		
-		File imapServerTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File imapServerFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File imapServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesLmtpConfigTemplateFileName());
+		File imapServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesLmtpConfigFileName());
 
 		//decide where load the existing configuration: lmtpserver.xml (if exist) or his template 	
 		if (imapServerFile.exists()) {			
@@ -75,25 +77,27 @@ public class LmtpServerConfigManager {
 	 * Update the target file (ie dsnservice.xml) with the provided input parameters. 
 	 * If this file is missing, create it merging template the old one one with the new one.
 	 * The input parameters are the ones shown in the front-end page.
-	 * @param jamesConfFolder The James server "conf" folder 
-	 * @param dns The bean containing the configuration to add
+	 * 
+	 * @param lmtpServer The bean containing the configuration to add
 	 * @throws ConfigurationException
 	 */
- 	public void updateConfiguration(LmtpServer lmtpServer, String jamesConfFolder) throws ConfigurationException{
+ 	public void updateConfiguration(LmtpServer lmtpServer) throws ConfigurationException{
 		
 		XMLConfiguration xmlConfiguration = null;		
 			
-		File dnsTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File dnsFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File lmtpServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesLmtpConfigTemplateFileName());
+		File lmtpServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesLmtpConfigFileName());
 
 		//decide where load the existing configuration: dnsservice.xml (if exist) or his template 	
-		if (dnsFile.exists()) {			
-			xmlConfiguration = new XMLConfiguration(dnsFile);		   
+		if (lmtpServerFile.exists()) {			
+			xmlConfiguration = new XMLConfiguration(lmtpServerFile);		   
 		}else
-			xmlConfiguration = new XMLConfiguration(dnsTemplateFile);			
+			xmlConfiguration = new XMLConfiguration(lmtpServerTemplateFile);			
 		
 		//set the target file where save the configuration
-		xmlConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		xmlConfiguration.setFileName(lmtpServerFile.getAbsolutePath());
 		
 		xmlConfiguration.setProperty("lmtpserver(0)[@enabled]",lmtpServer.isLmtpserverEnabled());
 		xmlConfiguration.setProperty("lmtpserver.bind",lmtpServer.getBindAddress());

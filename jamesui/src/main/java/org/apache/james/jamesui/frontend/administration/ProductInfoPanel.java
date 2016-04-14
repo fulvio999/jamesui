@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class ProductInfoPanel extends VerticalLayout {
 	/**
 	 * Constructor
 	 */
-	public ProductInfoPanel() {
+	public ProductInfoPanel(JamesuiConfiguration jamesuiConfiguration) {
 		
 		setSizeFull();	
 		

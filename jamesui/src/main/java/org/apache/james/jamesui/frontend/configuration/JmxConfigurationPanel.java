@@ -4,8 +4,8 @@ package org.apache.james.jamesui.frontend.configuration;
 import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.JmxConfiguration;
-import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.JmxConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +42,18 @@ public class JmxConfigurationPanel extends Panel {
 	
 	/* the manager used to manage stored DNS configuration */
 	private JmxConfigManager jmxConfigManager;
+	
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public JmxConfigurationPanel() {
+	public JmxConfigurationPanel(JamesuiConfiguration jamesuiConfiguration) {
 		
 		this.setSizeFull();  
 		this.setStyleName(Reindeer.PANEL_LIGHT);
 		
-		this.jmxConfigManager = new JmxConfigManager();
+		this.jmxConfigManager = new JmxConfigManager(jamesuiConfiguration);
 		FormLayout formLayout = new FormLayout();
 		
 		this.panelLayout = new GridLayout(1,2);
@@ -69,7 +71,7 @@ public class JmxConfigurationPanel extends Panel {
 		this.saveJmxConfigurationButton = new Button("Save");
 		this.saveJmxConfigurationButton.addClickListener(new SaveConfigurationButtonListener());
 		
-		loadCurrentConfig();
+		loadCurrentJmxConfig();
 		
 		formLayout.addComponent(jmxAddressText);
 		formLayout.addComponent(jmxPortText);
@@ -85,12 +87,12 @@ public class JmxConfigurationPanel extends Panel {
 	/**
 	 *  Load the currently stored JMX configuration in the dedicated file and fill the form to display it 
 	 */
-	private void loadCurrentConfig() {
+	private void loadCurrentJmxConfig() {
 		
 		JmxConfiguration jmxConfiguration;
 		
 		try {
-			jmxConfiguration = jmxConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");		
+			jmxConfiguration = jmxConfigManager.readConfiguration();		
 			jmxAddressText.setValue(jmxConfiguration.getJmxHost());
 			jmxPortText.setValue(jmxConfiguration.getJmxPort());
 		
@@ -112,18 +114,15 @@ public class JmxConfigurationPanel extends Panel {
         	
 			JmxConfiguration jmxConfiguration = new JmxConfiguration();
 			jmxConfiguration.setJmxHost(jmxAddressText.getValue());
-			jmxConfiguration.setJmxPort(jmxPortText.getValue());	    	       	
-    		
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
-    		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER);
-    		
+			jmxConfiguration.setJmxPort(jmxPortText.getValue());	     	       	
+     		
     		try {
-    			jmxConfigManager.updateConfiguration(jmxConfiguration,JAMES_CONF_FOLDER);
+    			jmxConfigManager.updateConfiguration(jmxConfiguration);
     			Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
     			
 			} catch (ConfigurationException e) {
 				LOG.error("Error saving JMX configuration, cause: ",e);
-				Notification.show("Error saving JMX configuration:"+e.getMessage(),  Type.ERROR_MESSAGE);
+				Notification.show("Error saving JMX configuration:"+e.getMessage(), Type.ERROR_MESSAGE);
 			}
         }		
 	}

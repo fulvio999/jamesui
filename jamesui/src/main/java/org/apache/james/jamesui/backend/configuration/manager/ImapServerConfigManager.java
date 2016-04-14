@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.ImapServer;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 
 
 /**
@@ -20,16 +21,14 @@ import org.apache.james.jamesui.backend.configuration.bean.ImapServer;
  *
  */
 public class ImapServerConfigManager {
-	
-	private static final String TARGET_FILE_NAME = "imapserver.xml";
-	private static final String TEMPLATE_FILE_NAME = "imapserver-template.conf";
-	
+
+	private JamesuiConfiguration jamesuiConfiguration;
 	
 	/**
 	 * Constructor
 	 */
-	public ImapServerConfigManager() {
-		
+	public ImapServerConfigManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;
 	}
 	
 	/**
@@ -38,12 +37,14 @@ public class ImapServerConfigManager {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public ImapServer readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public ImapServer readConfiguration() throws ConfigurationException {
 		
 		XMLConfiguration xmlConfiguration = null;
 		
-		File imapServerTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File imapServerFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File imapServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesImapConfigTemplateFileName());
+		File imapServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesImapConfigFileName());
 
 		//decide where load the existing configuration: imapserver.xml (if exist) or his template 	
 		if (imapServerFile.exists()) {			
@@ -77,25 +78,26 @@ public class ImapServerConfigManager {
 	 * Update the target file (ie dsnservice.xml) with the provided input parameters. 
 	 * If this file is missing, create it merging template the old one one with the new one.
 	 * The input parameters are the ones shown in the front-end page.
-	 * @param dns The bean containing the configuration to add
-	 * @param jamesConfFolder The James server "conf" folder 
+	 * @param dns The bean containing the configuration to add 
 	 * @throws ConfigurationException
 	 */
- 	public void updateConfiguration(ImapServer imapServer, String jamesConfFolder) throws ConfigurationException{
+ 	public void updateConfiguration(ImapServer imapServer) throws ConfigurationException{
 		
 		XMLConfiguration xmlConfiguration = null;		
 			
-		File dnsTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File dnsFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File imapServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesImapConfigTemplateFileName());
+		File imapServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesImapConfigFileName());
 
 		//decide where load the existing configuration: imapserver.xml (if exist) or his template 	
-		if (dnsFile.exists()) {			
-			xmlConfiguration = new XMLConfiguration(dnsFile);		   
+		if (imapServerFile.exists()) {			
+			xmlConfiguration = new XMLConfiguration(imapServerFile);		   
 		}else
-			xmlConfiguration = new XMLConfiguration(dnsTemplateFile);			
+			xmlConfiguration = new XMLConfiguration(imapServerTemplateFile);			
 		
 		//set the target file where save the configuration
-		xmlConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		xmlConfiguration.setFileName(imapServerFile.getAbsolutePath());
 		
 		xmlConfiguration.setProperty("imapserver(0)[@enabled]",imapServer.isImapServerEnabled());		
 	    xmlConfiguration.setProperty("imapserver.bind",imapServer.getBindAddress());

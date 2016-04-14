@@ -4,6 +4,7 @@ package org.apache.james.jamesui.frontend;
 import org.apache.james.jamesui.backend.client.jmx.ActiveMQclient;
 import org.apache.james.jamesui.backend.client.jmx.CamelClient;
 import org.apache.james.jamesui.backend.client.jmx.JamesClient;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.frontend.administration.AddressMappingPanel;
 import org.apache.james.jamesui.frontend.administration.DomainsPanel;
 import org.apache.james.jamesui.frontend.administration.MailStorePanel;
@@ -22,8 +23,12 @@ import org.springframework.stereotype.Component;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 
 
 /**
@@ -45,7 +50,7 @@ public class MainView extends VerticalLayout implements View {
 	 * Constructor
 	 * @throws Exception 
 	 */
-	public MainView(Scheduler scheduler,JamesClient jamesClient, ActiveMQclient activeMQclient, CamelClient camelClient, int heigth) {		
+	public MainView(Scheduler scheduler,JamesClient jamesClient, ActiveMQclient activeMQclient, CamelClient camelClient, int heigth, JamesuiConfiguration jamesuiConfiguration) {		
 		
 		setSizeFull();
 		setSpacing(true);
@@ -54,16 +59,17 @@ public class MainView extends VerticalLayout implements View {
 		this.headerPanel = new HeaderPanel(scheduler);
 		
 		this.bodyTabsheet = new TabSheet();		
+		
 		this.bodyTabsheet.addTab(new DomainsPanel(jamesClient),"Domains");
 		this.bodyTabsheet.addTab(new UsersPanel(jamesClient),"Users"); 
 		this.bodyTabsheet.addTab(new AddressMappingPanel(jamesClient,heigth),"Mapping");
-		this.bodyTabsheet.addTab(new MailStorePanel(),"Mail Store");		
+		this.bodyTabsheet.addTab(new MailStorePanel(jamesuiConfiguration),"Mail Store");		
 		this.bodyTabsheet.addTab(new SnapshotStatisticsPanel(activeMQclient, camelClient),"Statistics");		
-		this.bodyTabsheet.addTab(new HistoryStatisticPanel(),"History Statistic"); 	
-		this.bodyTabsheet.addTab(new MonitorPanel(scheduler),"Monitoring");
-		this.bodyTabsheet.addTab(new ConfigurationPanel(jamesClient),"Server Configuration");
-		this.bodyTabsheet.addTab(new ProductInfoPanel(),"Produtc Info");	
-		this.bodyTabsheet.addTab(new ProductConfigurationPanel(), "JamseUI configuration");
+		this.bodyTabsheet.addTab(new HistoryStatisticPanel(jamesuiConfiguration),"History Statistic"); 	
+		this.bodyTabsheet.addTab(new MonitorPanel(scheduler,jamesuiConfiguration),"Monitoring");
+		this.bodyTabsheet.addTab(new ConfigurationPanel(jamesClient, jamesuiConfiguration),"Server Configuration");
+		this.bodyTabsheet.addTab(new ProductInfoPanel(jamesuiConfiguration),"Produtc Info");	
+		this.bodyTabsheet.addTab(new ProductConfigurationPanel(jamesuiConfiguration), "JamseUI configuration");
 				
 		addComponent(headerPanel);
 		addComponent(bodyTabsheet);

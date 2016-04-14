@@ -5,8 +5,10 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.LmtpServer;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
+import org.apache.james.jamesui.backend.configuration.manager.JamesuiConfigurationManager;
 import org.apache.james.jamesui.backend.configuration.manager.LmtpServerConfigManager;
 
 /**
@@ -16,7 +18,7 @@ import org.apache.james.jamesui.backend.configuration.manager.LmtpServerConfigMa
  */
 public class LmtpServerConfigManagerTest extends TestCase {
 	
-	private static final String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
+	private static final String FAKE_JAMES_BASE_FOLDER = EnvironmentConfigurationReader.getCurrentDir()+File.separator+"src/test/resources";
 	private static final String TARGET_FILE_NAME = "lmtpserver.xml";
 	
 	private LmtpServerConfigManager lmtpServerConfigManager;
@@ -24,17 +26,21 @@ public class LmtpServerConfigManagerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
+		JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
+		JamesuiConfiguration jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();
+		
 		//remove old test result
-		File dnsFile = new File(JAMES_CONF_FOLDER+File.separator+TARGET_FILE_NAME);
+		File dnsFile = new File(FAKE_JAMES_BASE_FOLDER+File.separator+TARGET_FILE_NAME);
 		if(dnsFile.exists())
 		   dnsFile.delete();
 		
-		lmtpServerConfigManager = new LmtpServerConfigManager();
+		jamesuiConfiguration.setJamesBaseFolder(FAKE_JAMES_BASE_FOLDER);
+		lmtpServerConfigManager = new LmtpServerConfigManager(jamesuiConfiguration);
 	}
 
 	public void testReadConfiguration() throws ConfigurationException {
 		
-		LmtpServer lmtpServer =	lmtpServerConfigManager.readConfiguration(JAMES_CONF_FOLDER);	
+		LmtpServer lmtpServer =	lmtpServerConfigManager.readConfiguration();	
 		assertNotNull(lmtpServer);	
 		System.out.println(lmtpServer.toString());		
 	}
@@ -58,10 +64,10 @@ public class LmtpServerConfigManagerTest extends TestCase {
 						
 		System.out.println("LmapServer to save: "+lmtpServer.toString());
 		
-		lmtpServerConfigManager.updateConfiguration(lmtpServer,JAMES_CONF_FOLDER);
+		lmtpServerConfigManager.updateConfiguration(lmtpServer);
 				
 		//part 2: check previously stored configuration
-		LmtpServer loadedConfig = lmtpServerConfigManager.readConfiguration(JAMES_CONF_FOLDER);
+		LmtpServer loadedConfig = lmtpServerConfigManager.readConfiguration();
 		
 		System.out.println("LmapServer loaded config: "+loadedConfig.toString());
 			

@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.constant.QueueNameEnum;
 import org.apache.james.jamesui.backend.constant.QueueParamEnum;
 import org.apache.james.jamesui.backend.constant.RoutesNameEnum;
@@ -88,11 +88,14 @@ public class HistoryStatisticPanel extends VerticalLayout {
 	/* the database name to load/display chosen by user in the table */	
 	private String databaseNameToDisplay;
 	 
-
+    private JamesuiConfiguration jamesuiConfiguration;
+	 
 	/**
 	 * Constructor
 	 */
-	public HistoryStatisticPanel() {		
+	public HistoryStatisticPanel(JamesuiConfiguration jamesuiConfiguration) {
+		
+		this.jamesuiConfiguration = jamesuiConfiguration;
 		 
 		this.setSizeFull();
         this.setMargin(true);  
@@ -241,7 +244,7 @@ public class HistoryStatisticPanel extends VerticalLayout {
 	 }
 	
 	 /**
-	  * Invoked when the user press the "show" button (on the left panel) to show the statistics about of the queue/route chosen
+	  * Invoked when the user press the "show" button (on the left panel) to show the statistics saved on a chosen Database
 	  *
 	  **/
 	 private class ShowChartButtonListener implements com.vaadin.ui.Button.ClickListener
@@ -252,40 +255,50 @@ public class HistoryStatisticPanel extends VerticalLayout {
 		{		
 			DB targetDatabaseFile = null;
 			
-			LOG.trace("TARGET DB: "+databaseNameToDisplay);
+			LOG.debug("TARGET DB: "+databaseNameToDisplay);
 			
 			if(databaseNameToDisplay.startsWith("route")) 
 			{			   
-			   targetDatabaseFile = RoutesDatabaseManager.getRouteDataBase(EnvironmentConfigurationReader.getStatsDatabaseFolder(), databaseNameToDisplay);
+			   targetDatabaseFile = RoutesDatabaseManager.getRouteDataBase(jamesuiConfiguration.getStatisticDbLocation(), databaseNameToDisplay);
 			   
 			   RoutesParamEnum routeParam = (RoutesParamEnum) routeParamStatistics.getValue();
 			   RoutesNameEnum routeName = (RoutesNameEnum) routeNameCombo.getValue();
 			   
-			   List<String> x_values = RouteChartDataManager.extractRouteXvalues(targetDatabaseFile, routeName);
-			   List<Long> y_values = RouteChartDataManager.extractRouteYvalues(targetDatabaseFile, routeName, routeParam);
+			   if(routeParam == null || routeName == null )
+				   Notification.show("Please, choose a name/param value", Type.ERROR_MESSAGE);
 			   
-			   //refresh the chart
-			   chart.clearSerie();
-			   chart.addSeries(x_values,y_values);
-			   			   
-			   targetDatabaseFile.close(); //necessary to unlock DB files			   
-			   Notification.show("Operation Executed", Type.HUMANIZED_MESSAGE);
+			   else{			   
+				   List<String> x_values = RouteChartDataManager.extractRouteXvalues(targetDatabaseFile, routeName);
+				   List<Long> y_values = RouteChartDataManager.extractRouteYvalues(targetDatabaseFile, routeName, routeParam);
+				   
+				   //refresh the chart
+				   chart.clearSerie();
+				   chart.addSeries(x_values,y_values);
+				   			   
+				   targetDatabaseFile.close(); //necessary to unlock DB files			   
+				   Notification.show("Operation Executed", Type.HUMANIZED_MESSAGE);
+			   }
 			   
 			}else{ //queue
-				targetDatabaseFile = QueuesDatabaseManager.getQueueDataBase(EnvironmentConfigurationReader.getStatsDatabaseFolder(), databaseNameToDisplay);
+				targetDatabaseFile = QueuesDatabaseManager.getQueueDataBase(jamesuiConfiguration.getStatisticDbLocation(), databaseNameToDisplay);
 				
 				QueueParamEnum queueParam = (QueueParamEnum) queueParamStatistics.getValue();
 				QueueNameEnum queueName = (QueueNameEnum) queueNameCombo.getValue();
 				
-				List<String> x_values = QueueChartDataManager.extractQueueXvalues(targetDatabaseFile, queueName);
-				List<Long> y_values = QueueChartDataManager.extractQueueYvalues(targetDatabaseFile, queueName, queueParam);
+				if(queueParam == null || queueName == null )
+				   Notification.show("Please, choose name/param value", Type.ERROR_MESSAGE);
 				
-				//refresh the chart
-				chart.clearSerie();
-				chart.addSeries(x_values,y_values);
-				   
-				targetDatabaseFile.close(); //necessary to unlock DB files
-				Notification.show("Operation Executed", Type.HUMANIZED_MESSAGE);
+				else{
+					List<String> x_values = QueueChartDataManager.extractQueueXvalues(targetDatabaseFile, queueName);
+					List<Long> y_values = QueueChartDataManager.extractQueueYvalues(targetDatabaseFile, queueName, queueParam);
+					
+					//refresh the chart
+					chart.clearSerie();
+					chart.addSeries(x_values,y_values);
+					   
+					targetDatabaseFile.close(); //necessary to unlock DB files
+					Notification.show("Operation Executed", Type.HUMANIZED_MESSAGE);
+				}
 			}			
 		}		
 	 }
@@ -299,21 +312,28 @@ public class HistoryStatisticPanel extends VerticalLayout {
 		private static final long serialVersionUID = 1L;
 
 		public void buttonClick(ClickEvent event)
-		{				
-			statisticTypeCombo.validate();
-			String chosenStatsType = (String) statisticTypeCombo.getValue();		
-			fillOrUpdateStatisticsTable(chosenStatsType);	
+		{			
+			String chosenStatsType = (String) statisticTypeCombo.getValue();	
 			
-			if(statsDatabaseTable.getContainerDataSource().size() == 0) 
-			{
-			   manageLeftPanelVisibility(false, false,false);	
-			   Notification.show("No files found", Type.HUMANIZED_MESSAGE);
-			  
-			   statisticsFilterFormLayout.setCaption("");
-			   chart.clearSerie(); 
-			   chart.addSeries(new ArrayList<String>(),new ArrayList<Long>()); //empty values
-			}  
-		}		
+			if(chosenStatsType == null)
+			   Notification.show("Invalid statistic type", Type.ERROR_MESSAGE);
+			
+			else{
+			
+				fillOrUpdateStatisticsTable(chosenStatsType);	
+				
+				if(statsDatabaseTable.getContainerDataSource().size() == 0) 
+				{
+				   manageLeftPanelVisibility(false, false,false);	
+				   Notification.show("No files found", Type.HUMANIZED_MESSAGE);
+				  
+				   statisticsFilterFormLayout.setCaption("");
+				   chart.clearSerie(); 
+				   chart.addSeries(new ArrayList<String>(),new ArrayList<Long>()); //empty values
+				} 
+			
+			}
+		 }		
 	 }
 	 
 	 /**
@@ -321,19 +341,17 @@ public class HistoryStatisticPanel extends VerticalLayout {
 	  * @param chosenStatsType The value set in the combo Box: Queue or Route
 	  */
 	 private void fillOrUpdateStatisticsTable(String chosenStatsType)
-	 {	
-		  String statsDatabaseFolder = EnvironmentConfigurationReader.getStatsDatabaseFolder();		
-		  		  
+	 {		  		  
 		  Collection<File> filesFound = new ArrayList<File>();
 		 			
 		  if(chosenStatsType.equalsIgnoreCase("Queue"))				
-			 filesFound.addAll( FileUtils.listFiles(new File(statsDatabaseFolder), new QueueFileFilter(), null) );	
+			 filesFound.addAll( FileUtils.listFiles(new File(jamesuiConfiguration.getStatisticDbLocation()), new QueueFileFilter(), null) );	
 		  
 		  else if(chosenStatsType.equalsIgnoreCase("Route"))
-			 filesFound.addAll( FileUtils.listFiles(new File(statsDatabaseFolder), new RouteFileFilter(), null) );	
+			 filesFound.addAll( FileUtils.listFiles(new File(jamesuiConfiguration.getStatisticDbLocation()), new RouteFileFilter(), null) );	
 		  
 		  else
-			 filesFound.addAll( FileUtils.listFiles(new File(statsDatabaseFolder), new NoFileFilter(), null) );
+			 filesFound.addAll( FileUtils.listFiles(new File(jamesuiConfiguration.getStatisticDbLocation()), new NoFileFilter(), null) );
 		 
 		  IndexedContainer container = new IndexedContainer();
 	      container.addContainerProperty("File", String.class, null);
@@ -485,7 +503,7 @@ public class HistoryStatisticPanel extends VerticalLayout {
 	 */
 	 private boolean removeStatisticsFiles(String fileName) {
 		
-		String fileToRemove = EnvironmentConfigurationReader.getStatsDatabaseFolder()+File.separator+fileName;
+		String fileToRemove = jamesuiConfiguration.getStatisticDbLocation()+File.separator+fileName;
 		LOG.debug("File to remove: "+fileToRemove);	
 		
 		boolean result1 = FileUtils.deleteQuietly( new File(fileToRemove));

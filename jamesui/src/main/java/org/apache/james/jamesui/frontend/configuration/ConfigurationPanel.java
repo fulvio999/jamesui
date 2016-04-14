@@ -3,6 +3,7 @@ package org.apache.james.jamesui.frontend.configuration;
 import java.io.File;
 
 import org.apache.james.jamesui.backend.client.jmx.JamesClient;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;
@@ -32,7 +33,7 @@ public class ConfigurationPanel extends VerticalLayout{
 	/**
 	 * Constructor
 	 */
-	public ConfigurationPanel(JamesClient jamesClient) {
+	public ConfigurationPanel(JamesClient jamesClient, JamesuiConfiguration jamesuiConfiguration) {
 		
 		setSizeFull();		
 			
@@ -47,12 +48,12 @@ public class ConfigurationPanel extends VerticalLayout{
 	        
 	    Image deleteDomainImage = new Image("", resource);
 		
-	    accordion.addTab(new JmxConfigurationPanel(), "JMX", null);
-		accordion.addTab(new DnsConfigurationPanel(), "DNS", null); 
-		accordion.addTab(new Pop3ConfigurationPanel(jamesClient), "POP3", null);
-		accordion.addTab(new SmtpConfigurationPanel(jamesClient), "SMTP", null);
-		accordion.addTab(new LmtpConfigurationPanel(), "LMTP", null);
-		accordion.addTab(new ImapConfigurationPanel(jamesClient), "IMAP", null);
+	    accordion.addTab(new JmxConfigurationPanel(jamesuiConfiguration), "JMX", null);
+		accordion.addTab(new DnsConfigurationPanel(jamesuiConfiguration), "DNS", null); 
+		accordion.addTab(new Pop3ConfigurationPanel(jamesClient, jamesuiConfiguration), "POP3", null);
+		accordion.addTab(new SmtpConfigurationPanel(jamesClient, jamesuiConfiguration), "SMTP", null);
+		accordion.addTab(new LmtpConfigurationPanel(jamesuiConfiguration), "LMTP", null);
+		accordion.addTab(new ImapConfigurationPanel(jamesClient, jamesuiConfiguration), "IMAP", null);
 
 		addComponent(new Label("<b> James Server Configuration: to modify the configuration, JamesUI must be installad on the same host of Apache James. After modification a James restart is required </b>",ContentMode.HTML));
 		addComponent(deleteDomainImage);

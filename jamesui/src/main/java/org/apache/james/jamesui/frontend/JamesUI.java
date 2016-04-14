@@ -102,6 +102,7 @@ public class JamesUI extends UI implements ErrorHandler {
 			}   
 			
 			/* load and check jamesui.config or jamesui-devel.conf file */
+			this.jamesuiConfigurationManager = new JamesuiConfigurationManager();
 			JamesuiConfiguration jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();	
 			
 			if(!this.jamesuiConfigurationManager.isConfigurationValid(jamesuiConfiguration)) 
@@ -109,9 +110,11 @@ public class JamesUI extends UI implements ErrorHandler {
 			   errorMessage = "Error connecting with James, the server in up and running ? and jamesui.config file is available and correct ?";
 			   LOG.error("Error checking jamesui.config file, missing or invalid file");
 			   throw new ConfigurationException();
-			} 			
+			} 
 			
-			this.mainView = new MainView(scheduler,jamesClient, activeMQclient, camelClient, getPage().getBrowserWindowHeight());			
+			LOG.info("Using this Jamesui configuration: \n"+jamesuiConfiguration.toString());
+			
+			this.mainView = new MainView(scheduler, jamesClient, activeMQclient, camelClient, getPage().getBrowserWindowHeight(), jamesuiConfiguration);			
 			this.navigator.addView("", mainView);
 			this.configurationView = new ConfigurationView();	
 			this.navigator.addView(CONFIGURATION_PAGE, configurationView);		

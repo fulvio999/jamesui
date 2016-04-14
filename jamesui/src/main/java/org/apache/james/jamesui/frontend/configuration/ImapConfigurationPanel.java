@@ -7,6 +7,7 @@ import java.io.File;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.james.jamesui.backend.client.jmx.JamesClient;
 import org.apache.james.jamesui.backend.configuration.bean.ImapServer;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.ImapServerConfigManager;
 import org.slf4j.Logger;
@@ -40,6 +41,8 @@ public class ImapConfigurationPanel extends Panel {
 	private final static Logger LOG = LoggerFactory.getLogger(ImapConfigurationPanel.class);
 	
 	private JamesClient jamesClient;
+	private JamesuiConfiguration jamesuiConfiguration;
+	
 	private Label imapTitleLabel;	
 	
 	private Label serverStatusLabel; //running/stopped
@@ -69,12 +72,13 @@ public class ImapConfigurationPanel extends Panel {
 	/**
 	 * Constructor
 	 */
-	public ImapConfigurationPanel(JamesClient client) {
+	public ImapConfigurationPanel(JamesClient client, JamesuiConfiguration jamesuiConfiguration) {
 		
 		this.setSizeFull();  
 		this.setStyleName(Reindeer.PANEL_LIGHT);
 	       
 		this.jamesClient = client;
+		this.jamesuiConfiguration = jamesuiConfiguration;
 		
 		GridLayout panelLayout = new GridLayout(2,4);
 	    panelLayout.setMargin(true);
@@ -84,7 +88,7 @@ public class ImapConfigurationPanel extends Panel {
 	    HorizontalLayout startStopServerLayout = new HorizontalLayout();
 	    startStopServerLayout.setSpacing(true);
 	    	    
-	    this.imapServerConfigManager = new ImapServerConfigManager();
+	    this.imapServerConfigManager = new ImapServerConfigManager(jamesuiConfiguration);
 	    
 	    FormLayout formLayout0 = new FormLayout(); 
 	    FormLayout formLayout1 = new FormLayout(); 
@@ -150,7 +154,7 @@ public class ImapConfigurationPanel extends Panel {
 		this.saveImapConfigurationButton = new Button("Save");
 		this.saveImapConfigurationButton.addClickListener(new SaveConfigurationButtonListener());
 			
-		loadCurrentConfig();
+		loadCurrentImapConfig();
 		
 		startStopServerLayout.addComponent(serverStatusLabel);
 		startStopServerLayout.addComponent(startServerButton);
@@ -219,11 +223,11 @@ public class ImapConfigurationPanel extends Panel {
 			imapServer.setSocketTls(imapSocketTls.getValue());
 			imapServer.setStartTls(imapStartTls.getValue());        	
     	
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
+    		String JAMES_CONF_FOLDER = jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
     		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER);
     		
     		try {
-    			imapServerConfigManager.updateConfiguration(imapServer,JAMES_CONF_FOLDER);	
+    			imapServerConfigManager.updateConfiguration(imapServer);	
     			Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
 			} catch (ConfigurationException e) {
 				LOG.error("Error saving DNS configuration, cause: ",e);
@@ -294,12 +298,12 @@ public class ImapConfigurationPanel extends Panel {
 	/**
 	 *  Load the currently stored IMAP configuration in the dedicated file and fill the form to display it 
 	 */
-	private void loadCurrentConfig() {
+	private void loadCurrentImapConfig() {
 		
 		ImapServer imapServer;
 		
 		try {
-			imapServer = imapServerConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+			imapServer = imapServerConfigManager.readConfiguration();
 		
 			imapServerEnabled.setValue(imapServer.isImapServerEnabled());
 			imapBindAddress.setValue(imapServer.getBindAddress());

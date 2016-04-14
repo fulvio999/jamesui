@@ -11,6 +11,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.ConfigurationNode;
 import org.apache.commons.configuration.tree.DefaultConfigurationNode;
 import org.apache.james.jamesui.backend.configuration.bean.Dns;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 
 /**
  * Allow to configure DNS servers used by James server writing the dedicated xml configuration files
@@ -27,14 +28,13 @@ import org.apache.james.jamesui.backend.configuration.bean.Dns;
  */
 public class DnsConfigManager {
 	
-	private static final String TARGET_FILE_NAME = "dnsservice.xml";
-	private static final String TEMPLATE_FILE_NAME = "dnsservice-template.conf";
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public DnsConfigManager() {
-		
+	public DnsConfigManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;		
 	}
 	
 	/**
@@ -43,12 +43,14 @@ public class DnsConfigManager {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public Dns readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public Dns readConfiguration() throws ConfigurationException {
 		
 		XMLConfiguration xmlConfiguration = null;
 		
-		File dnsTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File dnsFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File dnsTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDnsConfigTemplateFileName());
+		File dnsFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDnsConfigFileName());
 		
 		//decide where load the existing configuration: dnsservice.xml (if exist) or his template 	
 		if (dnsFile.exists()) {			
@@ -80,12 +82,15 @@ public class DnsConfigManager {
 	 * @param jamesConfFolder The James server "conf" folder 
 	 * @throws ConfigurationException
 	 */
- 	public void updateConfiguration(Dns dns, String jamesConfFolder) throws ConfigurationException{
+ 	public void updateConfiguration(Dns dns) throws ConfigurationException{
 		
  		XMLConfiguration xmlConfiguration = null;		
-			
-		File dnsTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File dnsFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+
+ 		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File dnsTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDnsConfigTemplateFileName());
+		File dnsFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDnsConfigFileName());
+		
 
 		//decide where load the existing configuration: dnsservice.xml (if exist) or his template 	
 		if (dnsFile.exists()) {			
@@ -94,7 +99,7 @@ public class DnsConfigManager {
 			xmlConfiguration = new XMLConfiguration(dnsTemplateFile);			
 		}
 		//set the target file where save the configuration
-		xmlConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		xmlConfiguration.setFileName(dnsFile.getAbsolutePath());
 	    
 	    List<ConfigurationNode> serverList = new ArrayList<ConfigurationNode>(); 
 	    serverList.clear(); 
@@ -105,7 +110,7 @@ public class DnsConfigManager {
 	    	serverList.add( new DefaultConfigurationNode("server",it.next()) );	  
 	    }
 	    //removes already existing <server> nodes
-	    xmlConfiguration.clearTree("servers.server"); 
+	    xmlConfiguration.clearTree("servers.server");  
 	    //add new <server> nodes
 	    xmlConfiguration.addNodes("servers", serverList);	    
 	    

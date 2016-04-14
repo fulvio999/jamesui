@@ -26,21 +26,18 @@ public class ProductConfigurationPanel extends VerticalLayout {
 	
 	/* the path to JAMES/conf folder (depends on where the user has installed James server) */
 	private TextField jamesConfigFolder;
-	
-	private JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
+
 	
 	/**
 	 * Constructor
 	 */
-	public ProductConfigurationPanel() {
+	public ProductConfigurationPanel(JamesuiConfiguration jamesuiConfiguration) {
 		
 		setSizeFull();			
 		setCaption("Product Info");
 		
 		this.setMargin(true); 
-	    this.setSpacing(true);
-		
-	    JamesuiConfiguration jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();
+	    this.setSpacing(true);		
 	    
 		FormLayout formLayout = new FormLayout();	   
 	    

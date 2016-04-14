@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.james.jamesui.backend.client.jmx.JamesClient;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.SmtpServer;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.SmtpServerConfigManager;
@@ -39,6 +40,8 @@ public class SmtpConfigurationPanel extends Panel {
 	private final static Logger LOG = LoggerFactory.getLogger(SmtpConfigurationPanel.class);
 	
 	private JamesClient jamesClient;	
+	private JamesuiConfiguration jamesuiConfiguration;
+	
 	private Label smtpTitleLabel;
 	
 	private Label serverStatusLabel; //running/stopped
@@ -75,12 +78,13 @@ public class SmtpConfigurationPanel extends Panel {
 	/**
 	 * Constructor
 	 */
-	public SmtpConfigurationPanel(JamesClient client) {
+	public SmtpConfigurationPanel(JamesClient client, JamesuiConfiguration jamesuiConfiguration) {
 		
 		this.setSizeFull();  
 		this.setStyleName(Reindeer.PANEL_LIGHT);
 	    
 		this.jamesClient = client;
+		this.jamesuiConfiguration = jamesuiConfiguration;
 		
 	    GridLayout panelLayout = new GridLayout(2,4);
         panelLayout.setMargin(true);
@@ -90,7 +94,7 @@ public class SmtpConfigurationPanel extends Panel {
         HorizontalLayout startStopServerLayout = new HorizontalLayout();
 	    startStopServerLayout.setSpacing(true);
         
-        this.smtpServerConfigManager = new SmtpServerConfigManager();
+        this.smtpServerConfigManager = new SmtpServerConfigManager(jamesuiConfiguration);
         
         FormLayout formLayout0 = new FormLayout();        
         FormLayout formLayout = new FormLayout();       
@@ -172,7 +176,7 @@ public class SmtpConfigurationPanel extends Panel {
 		this.saveSmtpConfigurationButton = new Button("Save");
 		this.saveSmtpConfigurationButton.addClickListener(new SaveConfigurationButtonListener());				
 			
-		loadCurrentConfig();
+		loadCurrentSmtpConfig();
 		
 		startStopServerLayout.addComponent(serverStatusLabel);
 		startStopServerLayout.addComponent(startServerButton);
@@ -259,11 +263,11 @@ public class SmtpConfigurationPanel extends Panel {
     		
     		LOG.debug("SMTP Server configuration to Update: "+smtpServer.toString());
     		
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
+    		String JAMES_CONF_FOLDER = jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
     		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER);
 
     		try {
-    			smtpServerConfigManager.updateConfiguration(smtpServer,JAMES_CONF_FOLDER);
+    			smtpServerConfigManager.updateConfiguration(smtpServer);
     			Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
     			
 			} catch (ConfigurationException e) {
@@ -334,12 +338,12 @@ public class SmtpConfigurationPanel extends Panel {
 	/**
 	 *  Load the currently stored IMAP configuration in the dedicated file and fill the form to display it 
 	 */
-	private void loadCurrentConfig() {
+	private void loadCurrentSmtpConfig() {
 		
 		SmtpServer smtpServer;
 		
 		try {
-			smtpServer = smtpServerConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+			smtpServer = smtpServerConfigManager.readConfiguration();
 		
 			smtpServerEnabledCheckBox.setValue(smtpServer.isSmtpServerEnabled());
 			smtpBindAddress.setValue(smtpServer.getBindAddress());
@@ -354,7 +358,9 @@ public class SmtpConfigurationPanel extends Panel {
 			smtpStartTls.setValue(smtpServer.isStartTls());
 			smtpKeyStore.setValue(smtpServer.getKeystore());
 			smtpSecret.setValue(smtpServer.getSecret());
-			smtpProvider.setValue(smtpServer.getProvider());		
+			smtpProvider.setValue(smtpServer.getProvider());	
+			smtpAlgorithm.setValue(smtpServer.getAlgorithm());
+		
 		
 		} catch (ConfigurationException e) {
 			LOG.error("Error loading currently saved IMAP configuration, cause: ",e);			

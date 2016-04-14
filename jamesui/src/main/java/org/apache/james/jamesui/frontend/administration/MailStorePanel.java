@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.james.jamesui.backend.configuration.bean.DataBaseConfiguration;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.manager.DatabaseConfigurationManager;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.slf4j.Logger;
@@ -50,16 +51,19 @@ public class MailStorePanel extends VerticalLayout {
 	
 	private DatabaseConfigurationManager databaseConfigurationManager;
 	
+	private JamesuiConfiguration jamesuiConfiguration;
+	
 	/**
 	 * constructor
 	 */
-	public MailStorePanel() {
+	public MailStorePanel(JamesuiConfiguration jamesuiConfiguration) {
 		
 		setMargin(true);
 		setSpacing(true); 
         setSizeFull();
         
-        this.databaseConfigurationManager = new DatabaseConfigurationManager();
+        this.jamesuiConfiguration = jamesuiConfiguration;
+        this.databaseConfigurationManager = new DatabaseConfigurationManager(jamesuiConfiguration);
         
         FormLayout formLayout = new FormLayout();
         
@@ -115,7 +119,7 @@ public class MailStorePanel extends VerticalLayout {
 		DataBaseConfiguration dataBaseConfiguration;
 		
 		try {
-			dataBaseConfiguration = databaseConfigurationManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+			dataBaseConfiguration = databaseConfigurationManager.readConfiguration();
 			
 			supportedDatabaseTypeCombo.setValue(dataBaseConfiguration.getDatabaseType());
 			driverClassNameText.setValue(dataBaseConfiguration.getDriverClassName());
@@ -150,12 +154,9 @@ public class MailStorePanel extends VerticalLayout {
 			dataBaseConfiguration.setOpenjpaStreaming((String) openjpaStreamingEnabled.getValue()); 
 		    		
     		LOG.debug("Database configuration to Update: "+dataBaseConfiguration.toString());
-    		
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
-    		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER);
 
     		try {
-    			databaseConfigurationManager.updateConfiguration(dataBaseConfiguration,JAMES_CONF_FOLDER);
+    			databaseConfigurationManager.updateConfiguration(dataBaseConfiguration);
     			Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
     			
 			} catch (ConfigurationException e) {

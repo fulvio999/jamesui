@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.james.jamesui.backend.configuration.bean.Dns;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.manager.DnsConfigManager;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.slf4j.Logger;
@@ -62,11 +63,15 @@ public class DnsConfigurationPanel extends VerticalLayout {
 	
 	/* the manager used to manage stored DNS configuration */
 	private DnsConfigManager dnsConfigManager;
+	
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public DnsConfigurationPanel() {
+	public DnsConfigurationPanel(JamesuiConfiguration jamesuiConfiguration) {
+		
+		    this.jamesuiConfiguration = jamesuiConfiguration;
 		
 		    this.setSizeFull();  
 		    this.setStyleName(Reindeer.PANEL_LIGHT);
@@ -79,7 +84,7 @@ public class DnsConfigurationPanel extends VerticalLayout {
 	        FormLayout formLayout = new FormLayout();
 	        FormLayout formLayout1 = new FormLayout();
 	      
-	        this.dnsConfigManager = new DnsConfigManager();
+	        this.dnsConfigManager = new DnsConfigManager(jamesuiConfiguration);
 	        
 		    this.dnsTitleLabel = new Label("<b>DNS Configuration</b>",ContentMode.HTML);		   
 		    this.dnsAutodiscoveryEnabledCheckbox = new CheckBox("Enable Autodiscovery");
@@ -116,7 +121,7 @@ public class DnsConfigurationPanel extends VerticalLayout {
 			this.saveDnsConfigurationButton = new Button("Save");
 			this.saveDnsConfigurationButton.addClickListener(new SaveDnsButtonButtonListener());
 				
-			loadCurrentConfig();
+			loadCurrentDnsConfig(jamesuiConfiguration);
 			
 			panelLayout.addComponent(dnsTitleLabel); 		
 			panelLayout.newLine();
@@ -176,11 +181,11 @@ public class DnsConfigurationPanel extends VerticalLayout {
     		
     		LOG.debug("DNS Configuration to Update: "+dns.toString());
     		
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
+    		String JAMES_CONF_FOLDER = jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
     		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER); //eg:  C:\myprogram\eclipse-kepler\conf
     		
     		try {
-				dnsConfigManager.updateConfiguration(dns,JAMES_CONF_FOLDER);								
+				dnsConfigManager.updateConfiguration(dns);								
 				Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
 				
 			} catch (ConfigurationException e) {
@@ -257,10 +262,10 @@ public class DnsConfigurationPanel extends VerticalLayout {
 	/*
 	 * Load the currently stored data iDNS configuration file
 	 */
-	private void loadCurrentConfig(){
+	private void loadCurrentDnsConfig(JamesuiConfiguration jamesuiConfiguration){
 			
 		try {
-			Dns dns = dnsConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+			Dns dns = dnsConfigManager.readConfiguration();
 			
 			dnsAutodiscoveryEnabledCheckbox.setValue(dns.isAutodiscover());
 			dnsAuthoritativeCheckbox.setValue(dns.isAuthoritative());

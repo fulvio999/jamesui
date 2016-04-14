@@ -7,7 +7,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
 import org.apache.james.jamesui.backend.configuration.bean.DataBaseConfiguration;
-
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +29,16 @@ public class DatabaseConfigurationManager {
 		
 	private final static Logger LOG = LoggerFactory.getLogger(DatabaseConfigurationManager.class);
 	
-	private static final String TARGET_FILE_NAME = "james-database.properties";
-	private static final String TEMPLATE_FILE_NAME = "james-database-template.properties";
+//	private static final String TARGET_FILE_NAME = "james-database.properties";
+//	private static final String TEMPLATE_FILE_NAME = "james-database-template.properties";
+	
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public DatabaseConfigurationManager() {
+	public DatabaseConfigurationManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;
 		
 	}
 	
@@ -45,12 +48,14 @@ public class DatabaseConfigurationManager {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public DataBaseConfiguration readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public DataBaseConfiguration readConfiguration() throws ConfigurationException {
 				
 		PropertiesConfiguration propertiesConfiguration = null;
 		
-		File databaseTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File databaseFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File databaseTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDatabaseConfigTemplateFileName());
+		File databaseFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDatabaseConfigFileName());
 		
 		//decide where load the existing configuration: james-database.properties (if exist) or his template 	
 		if (databaseFile.exists()) {			
@@ -78,12 +83,14 @@ public class DatabaseConfigurationManager {
 	 * @param jamesConfFolder
 	 * @throws ConfigurationException
 	 */
-	public void updateConfiguration(DataBaseConfiguration dataBaseConfiguration, String jamesConfFolder) throws ConfigurationException{
+	public void updateConfiguration(DataBaseConfiguration dataBaseConfiguration) throws ConfigurationException{
 		
 		PropertiesConfiguration propertiesConfiguration = null;
 		
-		File databaseTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File databaseFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File databaseTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDatabaseConfigTemplateFileName());
+		File databaseFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesDatabaseConfigFileName());
 		
 		//decide where load the existing configuration: james-database.properties (if exist) or his template 	
 		if (databaseFile.exists()) {			
@@ -95,7 +102,7 @@ public class DatabaseConfigurationManager {
 		}		
 		
 		//set the target file where save the configuration
-		propertiesConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		propertiesConfiguration.setFileName(JAMES_CONF_FOLDER+File.separator+databaseFile);
 		
 		propertiesConfiguration.setProperty("vendorAdapter.database",dataBaseConfiguration.getDatabaseType());
 		propertiesConfiguration.setProperty("database.driverClassName",dataBaseConfiguration.getDriverClassName());

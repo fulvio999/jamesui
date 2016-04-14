@@ -1,6 +1,5 @@
 package org.apache.james.jamesui.backend.client.jmx;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.management.MBeanServerConnection;
@@ -11,7 +10,6 @@ import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.james.jamesui.backend.configuration.bean.JmxConfiguration;
-import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.JmxConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +22,7 @@ public class JmxServerConnectionManager {
 
 	private final static Logger LOG = LoggerFactory.getLogger(JmxServerConnectionManager.class);
 	
-	private static final JmxConfigManager jmxConfigManager = new JmxConfigManager();
+	//private static final JmxConfigManager jmxConfigManager = new JmxConfigManager();
 	
 	private volatile static MBeanServerConnection mbeanServerConnection;
 	private volatile static JMXConnector jmxConnector;
@@ -44,14 +42,17 @@ public class JmxServerConnectionManager {
 	 */
 	public static MBeanServerConnection getJmxServerConnection() throws IOException, ConfigurationException{
 		
+		JmxConfigManager jmxConfigManager = new JmxConfigManager();
+		
 		if (mbeanServerConnection == null) {	
 			
 			JMXServiceURL url;
 			
+			
 			try {			
-				if (jmxConfigManager.existCustomConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf")) //use custom user values
+				if (jmxConfigManager.existCustomConfiguration()) //user has provided his custom values
 				{
-				    JmxConfiguration jmxConfiguration = jmxConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+				    JmxConfiguration jmxConfiguration = jmxConfigManager.readConfiguration();
 				    url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"+jmxConfiguration.getJmxHost()+":"+jmxConfiguration.getJmxPort()+"/jmxrmi");
 				}else //use default ones 
 				    url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://127.0.0.1:9999/jmxrmi");

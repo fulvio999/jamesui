@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.database.manager.QueuesDatabaseManager;
 import org.apache.james.jamesui.backend.database.manager.RoutesDatabaseManager;
@@ -70,17 +71,21 @@ public class MonitorPanel extends HorizontalLayout{
     private DB routeDb;
     private DB queueDb;
     
+    private JamesuiConfiguration jamesuiConfiguration;
+    
 	/**
 	 * Constructor
 	 *
 	 */
-	public MonitorPanel(final Scheduler sch) {
+	public MonitorPanel(final Scheduler sch, JamesuiConfiguration jamesuiConfiguration) {
 		
 		setSizeFull();	
 				
 		this.setMargin(true); 
 	    this.setSpacing(true);
 		
+	    this.jamesuiConfiguration = jamesuiConfiguration;
+	    
 	    this.scheduler = sch;	    
 		this.monitorJobKey = new JobKey("monitorJob", "monitorJobGroup");
 		
@@ -190,8 +195,8 @@ public class MonitorPanel extends HorizontalLayout{
 				     //prepare DB, operation non necessary if the user has previously stopped a running job
 				     if(routeDb == null && queueDb == null) {
 				    	 LOG.trace("Creating the two empty databases...");
-				    	 routeDb = RoutesDatabaseManager.getRouteDataBase(EnvironmentConfigurationReader.getStatsDatabaseFolder(), "route-db_"+sdf2.format(new Date()));   
-				    	 queueDb = QueuesDatabaseManager.getQueueDataBase(EnvironmentConfigurationReader.getStatsDatabaseFolder(), "queue-db_"+sdf2.format(new Date()));
+				    	 routeDb = RoutesDatabaseManager.getRouteDataBase(jamesuiConfiguration.getStatisticDbLocation(), "route-db_"+sdf2.format(new Date()));   
+				    	 queueDb = QueuesDatabaseManager.getQueueDataBase(jamesuiConfiguration.getStatisticDbLocation(), "queue-db_"+sdf2.format(new Date()));
 				     }
 				     
 			    	 RoutesDatabaseManager.createStatsMetaData(routeDb,sdf.format(startDate),sdf.format(endDate),pollingFrequency.toString());

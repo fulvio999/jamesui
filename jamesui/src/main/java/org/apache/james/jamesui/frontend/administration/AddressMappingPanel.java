@@ -13,7 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.dialogs.ConfirmDialog;
 
+import com.google.gwt.user.client.ui.FocusListener;
+import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.validator.StringLengthValidator;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.Sizeable;
@@ -92,6 +98,8 @@ public class AddressMappingPanel extends VerticalLayout {
 	
 	// A list containing the mapping mapped to be removed
 	private HashSet<String> mappingToRemoveSet = new HashSet<String>();
+	
+	private JamesClient jamesClient; 
 
 	/**
 	 * Constructor
@@ -103,9 +111,14 @@ public class AddressMappingPanel extends VerticalLayout {
 		this.setMargin(true); 
 		this.setSpacing(true); 
 		
+		this.jamesClient = jamesClient;
+		
 	    //--------- Address Mapping ---------
-	    this.addressMappingUserCombo = new ComboBox("User:");
-	    this.addressMappingDomainCombo = new ComboBox("Domain:");
+	    this.addressMappingUserCombo = new ComboBox("User:"); 
+	    this.addressMappingDomainCombo = new ComboBox("Domain:");	   
+	    this.addressMappingUserCombo.addFocusListener(new ComboRefreshListener());	   
+	    this.addressMappingDomainCombo.addFocusListener(new ComboRefreshListener());
+	    
 	    this.addressMappingAddressText = new TextField("Address:");	    
 	 	    
 	    this.addressMappingLayout = new FormLayout();	    
@@ -146,6 +159,9 @@ public class AddressMappingPanel extends VerticalLayout {
 		//------------ Regex Mapping -------------
 	    this.regexMappingUserCombo = new ComboBox("User:");
 	    this.regexMappingDomainCombo = new ComboBox("Domain:");
+	    this.regexMappingUserCombo.addFocusListener(new ComboRefreshListener());	   
+	    this.regexMappingDomainCombo.addFocusListener(new ComboRefreshListener());
+	    
 	    this.regexMappingRegex = new TextField("Regex:");
 	    this.regexMappingRegex.addValidator(new StringLengthValidator("Must not be empty", 1, 100, false));	
 	   	    
@@ -186,8 +202,11 @@ public class AddressMappingPanel extends VerticalLayout {
 	    
 	    
 		//-------------- Error Mapping ---------------
-	    this.errorMappingUserCombo = new ComboBox("User:");
+	    this.errorMappingUserCombo = new ComboBox("User:"); 	    
 	    this.errorMappingDomainCombo = new ComboBox("Domain:");
+	    this.errorMappingUserCombo.addFocusListener(new ComboRefreshListener());	   
+	    this.errorMappingDomainCombo.addFocusListener(new ComboRefreshListener());
+	    
 	    this.errorMappingError = new TextField("Error:");	
 	    this.errorMappingError.addValidator(new StringLengthValidator("Must not be empty", 1, 100, false));	
 	    
@@ -231,6 +250,8 @@ public class AddressMappingPanel extends VerticalLayout {
 		//---------------- Domain mapping -----------------------	   
 	    this.domainMappingDomainCombo = new ComboBox("Domain:");
 	    this.domainMappingTargetDomainCombo = new ComboBox("Target Domain:");
+	    this.domainMappingDomainCombo.addFocusListener(new ComboRefreshListener());	   
+	    this.domainMappingTargetDomainCombo.addFocusListener(new ComboRefreshListener());
 	    
 	    this.domainMappingLayout = new FormLayout();
 	    this.domainMappingLayout.setMargin(new MarginInfo(true, false, false, true));
@@ -524,7 +545,7 @@ public class AddressMappingPanel extends VerticalLayout {
 		String[] users = jamesClient.getAllusers(); //without domain part
 		String[] domains = jamesClient.getDomains(); //without user part
 		
-		List<String> usersWithoutDomain = new ArrayList<String>();
+		List<String> usersWithoutDomain = new ArrayList<String>(); 
 		for(int i=0; i<users.length;i++)
 			usersWithoutDomain.add(users[i].split("@")[0]);
 		
@@ -539,6 +560,21 @@ public class AddressMappingPanel extends VerticalLayout {
 	    
 	    this.domainMappingDomainCombo.addItems(usersWithoutDomain); 
 	    this.domainMappingTargetDomainCombo.addItems(Arrays.asList(domains)); 		
+	}
+	
+	/**
+	 * Utility that remove alla items in all the combo
+	 */
+	private void emptyAllCombo(){
+		
+		addressMappingUserCombo.removeAllItems();
+		addressMappingDomainCombo.removeAllItems();
+		regexMappingUserCombo.removeAllItems();
+		regexMappingDomainCombo.removeAllItems();
+		errorMappingUserCombo.removeAllItems();
+		errorMappingDomainCombo.removeAllItems();
+		domainMappingDomainCombo.removeAllItems();
+		domainMappingTargetDomainCombo.removeAllItems();
 	}
 	
 	/**
@@ -565,6 +601,22 @@ public class AddressMappingPanel extends VerticalLayout {
 		Object users[] = {"User1", "User2", "User3", "User4", "pluto", "paperino", "paperoga"};
 		Object mapping[] = {"Mapping1", "Mapping2", "Mapping3", "Mapping4", "Mapping5", "Mapping6", "Mapping7"};
 	    //-----------------------------------------------------	    
+		
+	}
+	
+	/*
+	 * Listener attached at the combo that reload the combo valueswhen the combo is opened, to have the last values
+	 * of users and domains
+	 */
+	private class ComboRefreshListener implements com.vaadin.event.FieldEvents.FocusListener{
+
+		private static final long serialVersionUID = 1L;
+		
+		@Override
+		public void focus(FocusEvent event) {
+				emptyAllCombo();
+				insertComboData(jamesClient);
+		}
 		
 	}
 }

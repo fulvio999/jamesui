@@ -4,6 +4,7 @@ package org.apache.james.jamesui.frontend.configuration;
 import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.LmtpServer;
 import org.apache.james.jamesui.backend.configuration.manager.EnvironmentConfigurationReader;
 import org.apache.james.jamesui.backend.configuration.manager.LmtpServerConfigManager;
@@ -37,6 +38,8 @@ public class LmtpConfigurationPanel extends Panel {
 
 	private final static Logger LOG = LoggerFactory.getLogger(LmtpConfigurationPanel.class);
 	
+	private JamesuiConfiguration jamesuiConfiguration;
+	
 	private Label lmtpTitleLabel;
 	
 	private CheckBox lmtpServerEnabled;
@@ -60,7 +63,9 @@ public class LmtpConfigurationPanel extends Panel {
 	/**
 	 * Constructor
 	 */
-	public LmtpConfigurationPanel() {
+	public LmtpConfigurationPanel(JamesuiConfiguration jamesuiConfiguration) {
+		
+		this.jamesuiConfiguration = jamesuiConfiguration;
 		
 		this.setSizeFull();  
 		this.setStyleName(Reindeer.PANEL_LIGHT);
@@ -73,7 +78,7 @@ public class LmtpConfigurationPanel extends Panel {
 	    HorizontalLayout startStopServerLayout = new HorizontalLayout();
 	    startStopServerLayout.setSpacing(true);
 	    
-	    this.lmtpServerConfigManager = new LmtpServerConfigManager();
+	    this.lmtpServerConfigManager = new LmtpServerConfigManager(jamesuiConfiguration);
 	    
 	    FormLayout formLayout0 = new FormLayout(); 
 	    FormLayout formLayout1 = new FormLayout(); 
@@ -112,7 +117,7 @@ public class LmtpConfigurationPanel extends Panel {
 		this.saveLmtpConfigurationButton = new Button("Save");
 		this.saveLmtpConfigurationButton.addClickListener(new SaveConfigurationButtonListener());
 						
-		loadCurrentConfig();
+		loadCurrentLmtpConfig();
 		
 		panelLayout.addComponent(lmtpTitleLabel);	
 		panelLayout.newLine();
@@ -169,11 +174,11 @@ public class LmtpConfigurationPanel extends Panel {
     		lmtpServer.setMaxmessagesize(lmtpMaxMessageSize.getValue());
     		lmtpServer.setLmtpGreeting(lmtpSmtpGreeting.getValue());	        	
     		
-    		String JAMES_CONF_FOLDER = EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf";
+    		String JAMES_CONF_FOLDER = jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
     		LOG.debug("JAMES_CONF_FOLDER: "+JAMES_CONF_FOLDER);
     		
     		try {
-    			lmtpServerConfigManager.updateConfiguration(lmtpServer,JAMES_CONF_FOLDER);
+    			lmtpServerConfigManager.updateConfiguration(lmtpServer);
     			Notification.show("Operation Executed Successfully !", Type.HUMANIZED_MESSAGE);
     			
 			} catch (ConfigurationException e) {
@@ -187,12 +192,12 @@ public class LmtpConfigurationPanel extends Panel {
 	/**
 	 *  Load the currently stored IMAP configuration in the dedicated file and fill the form to display it 
 	 */
-	private void loadCurrentConfig() {
+	private void loadCurrentLmtpConfig() {
 		
 		LmtpServer lmtpServer;
 		
 		try {
-			lmtpServer = lmtpServerConfigManager.readConfiguration(EnvironmentConfigurationReader.getJamesBaseDir()+File.separator+"conf");
+			lmtpServer = lmtpServerConfigManager.readConfiguration();
 		
 			lmtpServerEnabled.setValue(lmtpServer.isLmtpserverEnabled());
 			lmtpBindAddress.setValue(lmtpServer.getBindAddress());

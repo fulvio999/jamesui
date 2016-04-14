@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.SmtpServer;
 
 /**
@@ -20,14 +21,13 @@ import org.apache.james.jamesui.backend.configuration.bean.SmtpServer;
  */
 public class SmtpServerConfigManager {
 	
-	private static final String TARGET_FILE_NAME = "smtpserver.xml";
-	private static final String TEMPLATE_FILE_NAME = "smtpserver-template.conf";
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public SmtpServerConfigManager() {
-		
+	public SmtpServerConfigManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;		
 	}
 	
 	
@@ -37,18 +37,21 @@ public class SmtpServerConfigManager {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public SmtpServer readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public SmtpServer readConfiguration() throws ConfigurationException {
 		
 		XMLConfiguration xmlConfiguration = null;
 		
-		File imapServerTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File imapServerFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File smtpServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesSmtpConfigTemplateFileName());
+		File smtpServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesSmtpConfigFileName());
+
 
 		//decide where load the existing configuration: lmtpserver.xml (if exist) or his template 	
-		if (imapServerFile.exists()) {			
-			xmlConfiguration = new XMLConfiguration(imapServerFile);		   
+		if (smtpServerFile.exists()) {			
+			xmlConfiguration = new XMLConfiguration(smtpServerFile);		   
 		}else
-			xmlConfiguration = new XMLConfiguration(imapServerTemplateFile);
+			xmlConfiguration = new XMLConfiguration(smtpServerTemplateFile);
 	
 		SmtpServer smtpServer = new SmtpServer();
 		/* NOTE: assign a default value in case the parameters is missing or empty */
@@ -91,21 +94,23 @@ public class SmtpServerConfigManager {
 	 * @param jamesConfFolder The James server "conf" folder 
 	 * @throws ConfigurationException
 	 */
- 	public void updateConfiguration(SmtpServer smtpServer, String jamesConfFolder) throws ConfigurationException{
+ 	public void updateConfiguration(SmtpServer smtpServer) throws ConfigurationException{
 		
 		XMLConfiguration xmlConfiguration = null;		
 			
-		File dnsTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File dnsFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File smtpServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesSmtpConfigTemplateFileName());
+		File smtpServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesSmtpConfigFileName());
 
 		//decide where load the existing configuration: dnsservice.xml (if exist) or his template 	
-		if (dnsFile.exists()) {			
-			xmlConfiguration = new XMLConfiguration(dnsFile);		   
+		if (smtpServerFile.exists()) {			
+			xmlConfiguration = new XMLConfiguration(smtpServerFile);		   
 		}else
-			xmlConfiguration = new XMLConfiguration(dnsTemplateFile);			
+			xmlConfiguration = new XMLConfiguration(smtpServerTemplateFile);			
 		
 		//set the target file where save the configuration
-		xmlConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		xmlConfiguration.setFileName(smtpServerFile.getAbsolutePath());
 		
 		xmlConfiguration.setProperty("smtpserver(0)[@enabled]",smtpServer.isSmtpServerEnabled());
 		xmlConfiguration.setProperty("smtpserver.bind",smtpServer.getBindAddress());

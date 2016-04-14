@@ -30,11 +30,11 @@ public class JamesuiConfigurationManager {
 	
 	/* config filename placed inside the war file used for Eclipse development */
 	private static final String DEVEL_CONFIG_FILE_NAME = "jamesui-devel.config";
-
-	/**
+	
+	/*
 	 * Constructor
 	 */
-	public JamesuiConfigurationManager() {
+	public JamesuiConfigurationManager(){
 		
 	}
 	
@@ -88,9 +88,31 @@ public class JamesuiConfigurationManager {
 			  if(!jamesuiConfigFile.exists())
 				 throw new ConfigurationException();
 		
-			  PropertiesConfiguration propertiesConfiguration = new PropertiesConfiguration(jamesuiConfigFile);				
+			  PropertiesConfiguration propertiesConfiguration = new PropertiesConfiguration(jamesuiConfigFile);	
+			  
 			  jamesuiConfiguration.setStatisticDbLocation(propertiesConfiguration.getString("statistic_db_location"));
-			  jamesuiConfiguration.setJamesBaseFolder(propertiesConfiguration.getString("james_base_folder"));			
+			  jamesuiConfiguration.setJamesBaseFolder(propertiesConfiguration.getString("james_base_folder"));	
+			  
+			  jamesuiConfiguration.setJamesDnsConfigTemplateFileName(propertiesConfiguration.getString("james_dns_config_template_file_name"));			  
+			  jamesuiConfiguration.setJamesDnsConfigFileName(propertiesConfiguration.getString("james_dns_config_file_name"));	
+			  
+			  jamesuiConfiguration.setJamesImapConfigTemplateFileName(propertiesConfiguration.getString("james_imap_config_template_file_name"));	
+			  jamesuiConfiguration.setJamesImapConfigFileName(propertiesConfiguration.getString("james_imap_config_file_name"));	
+			  
+			  jamesuiConfiguration.setJamesJmxConfigTemplateFileName(propertiesConfiguration.getString("james_jmx_config_template_file_name"));	
+			  jamesuiConfiguration.setJamesJmxConfigFileName(propertiesConfiguration.getString("james_jmx_config_file_name"));	
+			  
+			  jamesuiConfiguration.setJamesLmtpConfigTemplateFileName(propertiesConfiguration.getString("james_lmtp_config_template_file_name"));	
+			  jamesuiConfiguration.setJamesLmtpConfigFileName(propertiesConfiguration.getString("james_lmtp_config_file_name"));	
+			  
+			  jamesuiConfiguration.setJamesPop3ConfigTemplateFileName(propertiesConfiguration.getString("james_pop3_config_template_file_name"));	
+			  jamesuiConfiguration.setJamesPop3ConfigFileName(propertiesConfiguration.getString("james_pop3_config_file_name"));	
+			  
+			  jamesuiConfiguration.setJamesSmtpConfigTemplateFileName(propertiesConfiguration.getString("james_smtp_config_template_file_name"));	
+			  jamesuiConfiguration.setJamesSmtpConfigFileName(propertiesConfiguration.getString("james_smtp_config_file_name"));
+			  
+			  jamesuiConfiguration.setJamesDatabaseConfigTemplateFileName(propertiesConfiguration.getString("james_database_config_template_file_name"));	
+			  jamesuiConfiguration.setJamesDatabaseConfigFileName(propertiesConfiguration.getString("james_database_config_file_name"));
 					
 			}catch (ConfigurationException e) {
 				
@@ -100,9 +122,29 @@ public class JamesuiConfigurationManager {
 					  LOG.trace("Using file "+DEVEL_CONFIG_FILE_NAME+" : Jamesui is running inside Eclipse...");
 						
 					  Properties config = new Properties();
-					  config.load(this.getClass().getResourceAsStream("/"+DEVEL_CONFIG_FILE_NAME));					
+					  config.load(this.getClass().getResourceAsStream("/"+DEVEL_CONFIG_FILE_NAME));	
+					  
 					  jamesuiConfiguration.setStatisticDbLocation (config.getProperty("statistic_db_location"));
 					  jamesuiConfiguration.setJamesBaseFolder(config.getProperty("james_base_folder"));
+					  
+					  jamesuiConfiguration.setJamesDnsConfigTemplateFileName(config.getProperty("james_dns_config_template_file_name"));			  
+					  jamesuiConfiguration.setJamesDnsConfigFileName(config.getProperty("james_dns_config_file_name"));	
+					  
+					  jamesuiConfiguration.setJamesImapConfigTemplateFileName(config.getProperty("james_imap_config_template_file_name"));	
+					  jamesuiConfiguration.setJamesImapConfigFileName(config.getProperty("james_imap_config_file_name"));	
+					  
+					  jamesuiConfiguration.setJamesJmxConfigTemplateFileName(config.getProperty("james_jmx_config_template_file_name"));	
+					  jamesuiConfiguration.setJamesJmxConfigFileName(config.getProperty("james_jmx_config_file_name"));	
+					  
+					  jamesuiConfiguration.setJamesLmtpConfigTemplateFileName(config.getProperty("james_lmtp_config_template_file_name"));	
+					  jamesuiConfiguration.setJamesLmtpConfigFileName(config.getProperty("james_lmtp_config_file_name"));	
+					  
+					  jamesuiConfiguration.setJamesPop3ConfigTemplateFileName(config.getProperty("james_pop3_config_template_file_name"));	
+					  jamesuiConfiguration.setJamesPop3ConfigFileName(config.getProperty("james_pop3_config_file_name"));	
+					  
+					  jamesuiConfiguration.setJamesSmtpConfigTemplateFileName(config.getProperty("james_smtp_config_template_file_name"));	
+					  jamesuiConfiguration.setJamesSmtpConfigFileName(config.getProperty("james_smtp_config_file_name"));
+					 
 						
 					} catch (IOException ex) {
 						LOG.error("Error loading file: "+DEVEL_CONFIG_FILE_NAME+" inside the war file, Can't find jamesui config file ANYWHERE !!");

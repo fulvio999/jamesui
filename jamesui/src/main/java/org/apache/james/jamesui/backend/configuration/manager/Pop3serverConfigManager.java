@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.Pop3server;
 
 /**
@@ -21,14 +22,13 @@ import org.apache.james.jamesui.backend.configuration.bean.Pop3server;
  */
 public class Pop3serverConfigManager {
 	
-	private static final String TARGET_FILE_NAME = "pop3server.xml";
-	private static final String TEMPLATE_FILE_NAME = "pop3server-template.conf";
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public Pop3serverConfigManager() {
-		
+	public Pop3serverConfigManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;
 	}
 	
 	/**
@@ -37,12 +37,14 @@ public class Pop3serverConfigManager {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public Pop3server readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public Pop3server readConfiguration() throws ConfigurationException {
 		
 		XMLConfiguration xmlConfiguration = null;
 		
-		File pop3ServerTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File pop3ServerFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File pop3ServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesPop3ConfigTemplateFileName());
+		File pop3ServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesPop3ConfigFileName());
 
 		//decide where load the existing configuration: lmtpserver.xml (if exist) or his template 	
 		if (pop3ServerFile.exists()) {			
@@ -85,21 +87,23 @@ public class Pop3serverConfigManager {
 	 * @param jamesConfFolder The James server "conf" folder  
 	 * @throws ConfigurationException
 	 */
- 	public void updateConfiguration(Pop3server pop3server, String jamesConfFolder) throws ConfigurationException{
+ 	public void updateConfiguration(Pop3server pop3server) throws ConfigurationException{
 		
 		XMLConfiguration xmlConfiguration = null;		
 			
-		File dnsTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File dnsFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File pop3ServerTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesPop3ConfigTemplateFileName());
+		File pop3ServerFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesPop3ConfigFileName());
 
 		//decide where load the existing configuration: dnsservice.xml (if exist) or his template 	
-		if (dnsFile.exists()) {			
-			xmlConfiguration = new XMLConfiguration(dnsFile);		   
+		if (pop3ServerFile.exists()) {			
+			xmlConfiguration = new XMLConfiguration(pop3ServerFile);		   
 		}else
-			xmlConfiguration = new XMLConfiguration(dnsTemplateFile);			
+			xmlConfiguration = new XMLConfiguration(pop3ServerTemplateFile);			
 		
 		//set the target file where save the configuration
-		xmlConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		xmlConfiguration.setFileName(pop3ServerFile.getAbsolutePath());
 		
 		xmlConfiguration.setProperty("pop3server(0)[@enabled]",pop3server.isPop3serverEnabled());
 		xmlConfiguration.setProperty("pop3server.bind",pop3server.getBindAddress());
@@ -110,9 +114,9 @@ public class Pop3serverConfigManager {
 		xmlConfiguration.setProperty("pop3server.tls(0)[@socketTLS]",pop3server.isSocketTls());
 		xmlConfiguration.setProperty("pop3server.tls(0)[@startTLS]",pop3server.isStartTls());		
 		
-		xmlConfiguration.setProperty("pop3server.keystore", pop3server.getKeystore());
-		xmlConfiguration.setProperty("pop3server.secret", pop3server.getSecret());		
-		xmlConfiguration.setProperty("pop3server.provider",pop3server.getProvider());
+		xmlConfiguration.setProperty("pop3server.tls.keystore", pop3server.getKeystore());
+		xmlConfiguration.setProperty("pop3server.tls.secret", pop3server.getSecret());		
+		xmlConfiguration.setProperty("pop3server.tls.provider",pop3server.getProvider());
 		
 		xmlConfiguration.setProperty("pop3server.connectionLimit",pop3server.getConnectionLimit());
 		xmlConfiguration.setProperty("pop3server.connectionLimitPerIP",pop3server.getConnectionLimitPerIP());				

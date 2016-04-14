@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.james.jamesui.backend.configuration.bean.JamesuiConfiguration;
 import org.apache.james.jamesui.backend.configuration.bean.JmxConfiguration;
 
 /**
@@ -21,24 +22,33 @@ import org.apache.james.jamesui.backend.configuration.bean.JmxConfiguration;
  *
  */
 public class JmxConfigManager {
-	
-	private static final String TARGET_FILE_NAME = "jmx.properties";
-	private static final String TEMPLATE_FILE_NAME = "jmx-template.properties";
+		
+	private JamesuiConfiguration jamesuiConfiguration;
 
 	/**
 	 * Constructor
 	 */
-	public JmxConfigManager() {
-		
+	public JmxConfigManager(JamesuiConfiguration jamesuiConfiguration) {
+		this.jamesuiConfiguration = jamesuiConfiguration;
 	}	
+	
+	/**
+	 * Constructor
+	 */
+	public JmxConfigManager() {
+		JamesuiConfigurationManager jamesuiConfigurationManager = new JamesuiConfigurationManager();
+		this.jamesuiConfiguration = jamesuiConfigurationManager.loadConfiguration();
+	}
 	
 	/**
 	 * If exist file jmx.properties under JAMES/config folder mean that user has overwritten the default settings
 	 * @return true if exist file jmx.properties under JAMES/config folder
 	 */
-	public boolean existCustomConfiguration(String jamesConfFolder){
+	public boolean existCustomConfiguration(){
 		
-		File jmxConfFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File jmxConfFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesJmxConfigFileName());
 		if (jmxConfFile.exists())
 			return true;
 		else
@@ -47,17 +57,19 @@ public class JmxConfigManager {
 	}
 	
 	/**
-	 * Read the configuration from  jmx.properties (if exist) or jmx-template.properties  file
+	 * Read the configuration from jmx.properties (if exist) or jmx-template.properties  file
 	 * @param jamesConfFolder The James server "conf" folder 
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	public JmxConfiguration readConfiguration(String jamesConfFolder) throws ConfigurationException {
+	public JmxConfiguration readConfiguration() throws ConfigurationException {
 		
 		PropertiesConfiguration propertiesConfiguration = null;
 		
-		File jmxTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File jmxConfFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = this.jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File jmxTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesJmxConfigTemplateFileName());
+		File jmxConfFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesJmxConfigFileName());
 		
 		//decide where load the existing configuration: james-database.properties (if exist) or his template 	
 		if (jmxConfFile.exists()) {			
@@ -78,20 +90,21 @@ public class JmxConfigManager {
 	
 	/**
 	 * Update JMX configuration file 
-	 * @param JmxConfiguration The configuration to save
-	 * @param jamesConfFolder
+	 * @param JmxConfiguration The configuration to save	 
 	 * @throws ConfigurationException
 	 */
-	public void updateConfiguration(JmxConfiguration jmxConfiguration, String jamesConfFolder) throws ConfigurationException{
+	public void updateConfiguration(JmxConfiguration jmxConfiguration) throws ConfigurationException{
 		
 		PropertiesConfiguration propertiesConfiguration = null;
 		
-		File jmxTemplateFile = new File(jamesConfFolder+File.separator+TEMPLATE_FILE_NAME);
-		File databaseFile = new File(jamesConfFolder+File.separator+TARGET_FILE_NAME);
+		String JAMES_CONF_FOLDER = jamesuiConfiguration.getJamesBaseFolder()+File.separator+"conf";
+		
+		File jmxTemplateFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesJmxConfigTemplateFileName());
+		File jmxConfFile = new File(JAMES_CONF_FOLDER+File.separator+jamesuiConfiguration.getJamesJmxConfigFileName());
 		
 		//decide where load the existing configuration: james-database.properties (if exist) or his template 	
-		if (databaseFile.exists()) {			
-			propertiesConfiguration = new PropertiesConfiguration(databaseFile);
+		if (jmxConfFile.exists()) {			
+			propertiesConfiguration = new PropertiesConfiguration(jmxConfFile);
 			//System.out.println("reading databaseFile: "+databaseFile.getName());
 		}else{
 			propertiesConfiguration = new PropertiesConfiguration(jmxTemplateFile);
@@ -99,7 +112,7 @@ public class JmxConfigManager {
 		}		
 		
 		//set the target file where save the configuration
-		propertiesConfiguration.setFileName(jamesConfFolder+File.separator+TARGET_FILE_NAME);		
+		propertiesConfiguration.setFileName(jmxConfFile.getAbsolutePath());		
 		propertiesConfiguration.setProperty("jmx.address",jmxConfiguration.getJmxHost());
 		propertiesConfiguration.setProperty("jmx.port",jmxConfiguration.getJmxPort());
 			    
