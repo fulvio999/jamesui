@@ -1,6 +1,7 @@
 # jamesui
 
 An unofficial web console to administer Apache James 3 server.
+(moved from my old repository: https://sourceforge.net/projects/andoffline/ )
 
 **See pdf file under doc folder for technical guide (build,running,deploy)**
 
