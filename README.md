@@ -6,7 +6,7 @@ An unofficial web console to administer Apache James 3 server.
 
 Structure of this repository:
 - doc: documentation of the product
-- conf: a sample configuration file to place undef <tomcat-home>/conf folder
+- conf: a sample configuration file to place under  <tomcat-home>/conf folder where jamesui is deployed
 - jamesui: the source code
 
 **See pdf file under doc folder for technical guide (build,running,deploy, configuration)**
